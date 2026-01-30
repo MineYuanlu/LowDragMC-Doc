@@ -1,7 +1,7 @@
 site_name: LowDragMC
 copyright: Copyright &copy; 2019 - 2025 KilaBash
-site_url: https://mineyuanlu.github.io/LowDragMC-Doc/
-repo_url: https://github.com/MineYuanlu/LowDragMC-Doc
+site_url: https://low-drag-mc.github.io/LowDragMC-Doc/
+repo_url: https://github.com/Low-Drag-MC/LowDragMC-Doc
 repo_name: Low-Drag-MC
 theme:
   name: material
@@ -43,10 +43,10 @@ extra:
   generator: false
   alternate:
     - name: English
-      link: /en/ 
+      link: ./en/ 
       lang: en
     - name: 中文
-      link: /zh/
+      link: ./zh/
       lang: zh
 extra_css:
   - css/custom.css
