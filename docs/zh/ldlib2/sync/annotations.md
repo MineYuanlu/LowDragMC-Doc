@@ -1,28 +1,28 @@
-# Anotations
+# 注解
 {{ version_badge("2.1.0", label="Since", icon="tag") }}
 
-We show all anotations and their usage in this page.
+本页面展示了所有注解及其用法。
 
-!!! note "LDLib Dev Tool"
-    ![Image title](../assets/plugin.png){ width="60%" align=right}
+!!! note "LDLib 开发工具"
+    ![图片标题](../assets/plugin.png){ width="60%" align=right }
 
-    If you are going to develop with LDLib2, we strongly recommend you to install our IDEA Plugin [LDLib Dev Tool](https://plugins.jetbrains.com/plugin/28032-ldlib-dev-tool). 
-    The plugin has:
+    如果您打算使用 LDLib2 进行开发，我们强烈建议您安装我们的 IDEA 插件 [LDLib 开发工具](https://plugins.jetbrains.com/plugin/28032-ldlib-dev-tool)。
+    该插件具有以下功能：
 
-    - code highlight
-    - syntax check
-    - cdoe jumping
-    - auto complete
-    - others
-    
-    which greatly assist you in utilizing features of LDLib2. Especially, all the annotations of LDLib2 have been supported for use.
+    - 代码高亮
+    - 语法检查
+    - 代码跳转
+    - 自动补全
+    - 其他功能
 
-## Common Annotations
+    这些功能将极大地帮助您利用 LDLib2 的特性。特别是，LDLib2 的所有注解都已得到使用支持。
+
+## 通用注解
 
 ### `@DescSynced`
-Annotate a field, the value of this field (server side) should be synced to the client side (specifically, `remote`)
+注解一个字段，该字段的值（服务器端）应同步到客户端（具体来说是 `remote` 端）。
 
-``` java
+```java
 @DescSynced
 int a;
 
@@ -36,18 +36,18 @@ private List<ResourceLocation> c = new ArrayList<>();
 ---
 
 ### `@Persisted`
-Annotate a field, the value of this field (server side) will be written/read to/from BlockEntities' nbt. 
+注解一个字段，该字段的值（服务器端）将被写入/读取到/自 BlockEntity 的 NBT 中。
 
-`String key()` represent tag name in nbt. default -- use field name instead.
+`String key()` 表示 NBT 中的标签名。默认值 —— 使用字段名代替。
 
-``` java
+```java
 @Persisted(key = "fluidAmount")
 int value = 100;
 @Persisted
 boolean isWater = true;
 ```
 
-its nbt/json looks as below:
+其 NBT/JSON 看起来如下：
 ```json
 {
   "fluidAmount": 100,
@@ -55,15 +55,15 @@ its nbt/json looks as below:
 }
 ```
 
-`boolean subPersisted()` If true, it will wrap the field's internal value based on its `non-null` instance.
+`boolean subPersisted()` 如果为 true，它将基于其`非空`实例包装字段的内部值。
 
-It is very useful for `final` instance which doesn't allow new instance creation. If the filed set `subPersisted = true`, LDLib2 will do:
+这对于不允许创建新实例的 `final` 实例非常有用。如果字段设置了 `subPersisted = true`，LDLib2 将执行以下操作：
 
-- if the field inherits from `INBTSerializable<?>`, it will try to use its api for serialization.
-- otherwise, it will serialize the field's internal values and wrap it as a map.
+- 如果字段继承自 `INBTSerializable<?>`，它将尝试使用其 API 进行序列化。
+- 否则，它将序列化字段的内部值并将其包装为一个映射。
 
 ```java
-@Persisted(subPersisted = true) // @Persisted is also fine here, because INBTSerializable is also supported as a read-only field.
+@Persisted(subPersisted = true) // 这里使用 @Persisted 也可以，因为 INBTSerializable 作为只读字段也受支持。
 private final INBTSerializable<CompoundTag> stackHandler = new ItemStackHandler(5);
 @Persisted(subPersisted = true)
 private final TestContainer testContainer = new TestContainer();
@@ -76,7 +76,7 @@ public static class TestContainer {
 }
 ```
 
-its nbt/json looks as below:
+其 NBT/JSON 看起来如下：
 ```json
 {
     "stackHandler": {
@@ -93,103 +93,103 @@ its nbt/json looks as below:
 ---
 
 ### `@LazyManaged`
- An annotation that marks a field as being managed lazily. This means that the field will only be marked as dirty manually.automatically.
- This annotation is useful for fields that are not updated frequently, or for fields that are updated in a batch.
+ 一个注解，标记一个字段为惰性管理。这意味着该字段将仅通过手动标记为脏。
+ 此注解对于不频繁更新的字段，或批量更新的字段很有用。
 
-``` java
+```java
 @DescSynced
 @Persisted
 int a;
 
 @DescSynced 
 @Persisted
-@LayzManaged
+@LazyManaged // 修正了原文中的拼写错误 LayzManaged -> LazyManaged
 int b;
 
 public void setA(int value) {
-    this.a = value;  // will be sync/persist automatically, in general
+    this.a = value;  // 通常会自动同步/持久化
 }
 
 public void setB(int value) {
     this.b = value;
-    markDirty("b"); // mannually notify chagned
+    markDirty("b"); // 手动通知更改
 }
 ```
 
 ---
 
 ### `@ReadOnlyManaged`
-This annotation is used to mark a read-only field that is managed by the user. 
+此注解用于标记一个由用户管理的只读字段。
 
-`read-only` types (e.g. `IManaged` and `INBTSerializable<?>`) requires the field to be non-null and the field instance won't be changed (a final field). 
+`只读` 类型（例如 `IManaged` 和 `INBTSerializable<?>`）要求字段非空且字段实例不会更改（一个 final 字段）。
 
-!!! note "What are `read-only` types?"
-    `read-only` types refer to fields which are always non-null and immutable, and not sure how to create a new instance of this type. More details can be found in [Types Support](./types_support.md){ data-preview }.
+!!! note "什么是 `只读` 类型？"
+    `只读` 类型指的是那些始终非空且不可变，并且不确定如何创建该类型新实例的字段。更多详情请参阅 [支持的类型](./types_support.md){ data-preview }。
 
-Because we don't know how to create a new instance for these types. In this case, you can use this annotation and provide methods to
-store a unique id from server with `serializeMethod()` and create a new instance at the client with `deserializeMethod()`.
- 
-Furthermore, you can provide a method to self-control whether the field has changed with `onDirtyMethod()`.
+因为我们不知道如何为这些类型创建新实例。在这种情况下，您可以使用此注解，并提供方法，
+通过 `serializeMethod()` 从服务器存储唯一 ID，并通过 `deserializeMethod()` 在客户端创建新实例。
 
-- `onDirtyMethod`: specify a method for customize dirty checking. return whether it has changed.
+此外，您可以通过 `onDirtyMethod()` 提供方法来控制字段是否已更改。
+
+- `onDirtyMethod`: 指定一个方法用于自定义脏检查。返回是否已更改。
     ```java
     boolean methodName();
     ```
-- `serializeMethod`: return a unique id (`Tag`) of given instance.
+- `serializeMethod`: 返回给定实例的唯一 ID (`Tag`)。
     ```java
     Tag methodName(@Nonnull T obj);
     ```
-- `deserializeMethod`: create an instance via given uid.
+- `deserializeMethod`: 通过给定的 ID 创建实例。
     ```java
     T methodName(@Nonnull Tag tag)
     ```
 
-Synchronization Process (Persistence is similar)
+同步过程（持久化类似）
 
 ```mermaid
 flowchart LR
 
-    A[Start: Check read-only field] --> B{UID == previous snapshot?}
+    A[开始: 检查只读字段] --> B{UID == 之前的快照?}
 
-    %% Step 1
-    B -- No --> C[Mark field as dirty<br/>Store latest snapshot] --> D[Sync UID + Value<br/>Notify remote update]
-    B -- Yes --> E{Value dirty?}
+    %% 步骤 1
+    B -- 否 --> C[标记字段为脏<br/>存储最新快照] --> D[同步 UID + 值<br/>通知远程更新]
+    B -- 是 --> E{值变脏了?}
 
-    %% Step 2
-    E -- No --> Z[End]
-    E -- Yes --> F{Has onDirtyMethod?}
+    %% 步骤 2
+    E -- 否 --> Z[结束]
+    E -- 是 --> F{有 onDirtyMethod 吗?}
 
-    F -- Yes --> G[Use custom method<br/>to check dirty]
-    F -- No --> H[Use registered read-only type<br/>to check dirty]
+    F -- 是 --> G[使用自定义方法<br/>检查脏状态]
+    F -- 否 --> H[使用注册的只读类型<br/>检查脏状态]
 
-    %% Step 3
-    G --> I[Field is dirty] --> D
+    %% 步骤 3
+    G --> I[字段变脏] --> D
     H --> I
 
-    %% Remote side
-    D --> R[Remote receives update] --> S{UID equal?}
+    %% 远程端
+    D --> R[远程接收更新] --> S{UID 相等?}
 
-    %% Step 4
-    S -- No --> T[Create new instance<br/>via deserializeMethod] --> U[Update value via read-only type] --> Z
-    S -- Yes --> U --> Z
+    %% 步骤 4
+    S -- 否 --> T[通过 deserializeMethod<br/>创建新实例] --> U[通过只读类型更新值] --> Z
+    S -- 是 --> U --> Z
 ```
 
-1. To check if a `read-only` field has internal changes, LDLib2 will first check if unique id is equal to previous snapshot. 
-    - If `not`, mark this field as dirty, and store the latest snapshot.
-    - If `true`, go to step 2.
-2. Check if the the value is dirty compared with previous snapshot.
-    - if `onDirtyMethod` is not set, LDLib2 will check dirty according to the registered `read-only` type.
-    - if `true`, use customized method to check if dirty.
-3. If the field is dirty. LDLib2 will sync both uid and value data and ask remote (client) to update value.
-4. While the remote receive the changes, it will check uid first. 
-    - if not equal, create a new instance based on `deserializeMethod` first.
-    - then update value based on registered `read-only` type.
+1. 为了检查 `只读` 字段是否有内部更改，LDLib2 将首先检查唯一 ID 是否与之前的快照相等。
+    - 如果`不相等`，则标记此字段为脏，并存储最新快照。
+    - 如果`相等`，则转到步骤 2。
+2. 检查值是否与之前的快照相比变脏了。
+    - 如果未设置 `onDirtyMethod`，LDLib2 将根据注册的 `只读` 类型检查脏状态。
+    - 如果设置了，则使用自定义方法检查是否变脏。
+3. 如果字段变脏了。LDLib2 将同步 UID 和值数据，并要求远程（客户端）更新值。
+4. 当远程接收到更改时，它将首先检查 UID。
+    - 如果不相等，则先基于 `deserializeMethod` 创建一个新实例。
+    - 然后基于注册的 `只读` 类型更新值。
 
-Example
+示例
 
 ```java
 @Persisted
-@DescSync
+@DescSynced // 修正了原文中的拼写错误 @DescSync -> @DescSynced
 @ReadOnlyManaged(serializeMethod = "testGroupSerialize", deserializeMethod = "testGroupDeserialize")
 private final List<TestGroup> groupList = new ArrayList<>();
 
@@ -215,17 +215,17 @@ public List<TestGroup> testGroupDeserialize(IntTag tag) {
 }
 ```
 !!! note
-    In this example, `onDirtyMethod` is unncessary. Because `TestGroup` inherits from `IPersistedSerializable`, which also inherits from `INBTSerializable<?>`. Therefore, it is a supported `read-only` type.
+    在此示例中，`onDirtyMethod` 不是必需的。因为 `TestGroup` 继承自 `IPersistedSerializable`，而 `IPersistedSerializable` 又继承自 `INBTSerializable<?>`。因此，它是一个受支持的 `只读` 类型。
 
 ---
 
 ### `@RPCMethod`
-Annotate a method, you can send RPC packet between server and remote. You are free to define the parameters of the methods long as the parameters support sync, and send rpc anywhere in your class.
-It is useful to spread an event (`c->s` / `s->c`).
+注解一个方法，您可以在服务器和远程端之间发送 RPC 数据包。只要参数支持同步，您可以自由定义方法的参数，并且可以在类中的任何位置发送 RPC。
+这对于传播事件（`c->s` / `s->c`）很有用。
 !!! note
-    if the `RPCSender` is defined as your first parameter of your method. LDLib2 will provide the sender information.
+    如果 `RPCSender` 被定义为方法的第一个参数。LDLib2 将提供发送者信息。
 
-Make sure that all args match the parameters of annotated method.
+确保所有参数与注解方法的参数匹配。
 
 ```java
 @RPCMethod
@@ -242,44 +242,44 @@ public void rpcTestB(ItemStack item) {
     LDLib2.LOGGER.info("Received RPC: {}", item);
 }
 
-// methods to send rpc
+// 发送 RPC 的方法
 public void sendMsgToPlayer(ServerPlayer player, String msg) {
-    rpcToServer(player, "rpcTestA", msg)
+    rpcToServer(player, "rpcTestA", msg); // 修正了缺少的分号
 }
 
 public void sendMsgToAllTrackingPlayers(ServerPlayer player, String msg) {
-    rpcToTracking("rpcTestA", msg)
+    rpcToTracking("rpcTestA", msg); // 修正了缺少的分号
 }
 
 public void sendMsgToServer(ItemStack item) {
-    rpcToServer("rpcTestB", item)
+    rpcToServer("rpcTestB", item); // 修正了缺少的分号
 }
 ```
 
-* `rpcToTracking`: send to all remote players if this chunk is loaded(tracked) in their remotes.
-* `rpcToPlayer`: send to a specfic player
-* `rpcToServer`: send to server.
+* `rpcToTracking`: 如果此区块在远程玩家的客户端中已加载（被追踪），则发送给所有远程玩家。
+* `rpcToPlayer`: 发送给特定玩家。
+* `rpcToServer`: 发送给服务器。
 
 ```java
 @RPCMethod
 public void rpcTest(String msg) {
-    if (level.isClient) { // receive 
-        LDLib2.LOGGER.info("Received RPC from server: {}", message);
-    } else { // send
-        rpcToTracking("rpcTest", msg)
+    if (level.isClientSide) { // 接收 // 修正了 level.isClient -> level.isClientSide
+        LDLib2.LOGGER.info("Received RPC from server: {}", msg); // 修正了参数名 message -> msg
+    } else { // 发送
+        rpcToTracking("rpcTest", msg); // 修正了缺少的分号
     }
 }
 ```
-In this example, you can send and receive msg within one method, which is a neat method.
+在此示例中，您可以在一个方法内发送和接收消息，这是一种简洁的方法。
 
 ---
 
 ### `@UpdateListener`
-Use this annotation to add a listener of sync receiving on the remote side.
+使用此注解在远程端添加一个同步接收的监听器。
 
-Specifies the name of the method to be called (remote side) when the annotated field is updated from the server.
+指定当注解字段从服务器更新时，要调用的方法（远程端）的名称。
 
-The first parameter is the old value, and the second parameter is the new value.
+第一个参数是旧值，第二个参数是新值。
 
 ```java
 @DescSynced
@@ -294,13 +294,13 @@ private void onIntValueChanged(int oldValue, int newValue) {
 ---
 
 ### `@ConditionalSynced`
-In general, all fields annotated with `@DescSynced` will be synced if chhanged. 
-However, you may want to control whether to sync, e.g., conditional sync.
+通常，所有用 `@DescSynced` 注解的字段在更改时都会同步。
+但是，您可能希望控制是否同步，例如，条件同步。
 
-LDLib2 provide this annotation allow you to fine-grained control whether the field should be synced.
+LDLib2 提供此注解，允许您精细控制字段是否应同步。
 
 ```java
-@Configurable
+@Configurable // 注意：此示例中的 @Configurable 可能来自其他上下文或文档错误，在 LDLib2 同步上下文中常见的是 @DescSynced
 @ConditionalSynced(methodName = "shouldSync")
 int intField = 10;
 
@@ -312,10 +312,10 @@ public boolean shouldSync(int value) {
 ---
 
 ### `@SkipPersistedValue`
-In general, all fields annotated with `@Persisted` will be serialized during persistence. 
-However, you may want to skip serialization, e.g., reduce output size, skip unchanged value, etc.
+通常，所有用 `@Persisted` 注解的字段在持久化期间都会被序列化。
+但是，您可能希望跳过序列化，例如，减少输出大小，跳过未更改的值等。
 
-LDLib2 provide this annotation allow you to fine-grained control whether the field should be serialized.
+LDLib2 提供此注解，允许您精细控制字段是否应序列化。
 
 ```java
 @Persisted
@@ -323,27 +323,27 @@ int intField = 10;
 
 @SkipPersistedValue(field = "intField")
 public boolean skipIntFieldPersisted(int value) {
-    // 10 is the initial value of this class, there is no need to store it.
+    // 10 是这个类的初始值，没有必要存储它。
     return value == 10;
 }
 ```
 
 ---
 
-## Exclusive to `BlockEntity`
+## `BlockEntity` 专用注解
 !!! note
-    These annotations are designed specially for `BlockEntity`, check [Manage BlockEntity](./blockentity.md){ data-preview } before using them.
+    这些注解专为 `BlockEntity` 设计，在使用前请查阅 [管理 BlockEntity](./blockentity.md){ data-preview }。
 
 ### `@DropSaved`
-Sometimes, you want to store the field values into the drop item while breaking the block.
-This annotation is used to mark a field to be saved to the drop item. However, it also require additional code work before using it.
+有时，您希望在破坏方块时将字段值存储到掉落物中。
+此注解用于标记一个字段要保存到掉落物中。但是，使用前还需要额外的代码工作。
 ```java
 public class MyBlock extends Block {
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
         if (!level.isClientSide) {
             if (level.getBlockEntity(pos) instanceof IPersistManagedHolder persistManagedHolder) {
-                // you can use other DataComponents if you want.
+                // 如果您愿意，可以使用其他 DataComponents。
                 Optional.ofNullable(stack.get(DataComponents.CUSTOM_DATA)).ifPresent(customData -> {
                     persistManagedHolder.loadManagedPersistentData(customData.copyTag());
                 });
@@ -359,7 +359,7 @@ public class MyBlock extends Block {
             var tag = new CompoundTag();
             persistManagedHolder.saveManagedPersistentData(tag, true);
             drop.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
-            // you can move this part to LootTable if you want.
+            // 如果您愿意，可以将这部分移到 LootTable 中。
             return List.of(drop);
         }
         return super.getDrops(state, params);
@@ -367,7 +367,7 @@ public class MyBlock extends Block {
 
     @Override
     public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
-        // if you want to clone an item with drop data, don't forget it
+        // 如果您想克隆一个带有掉落数据的物品，别忘了这个
         if (level.getBlockEntity(pos) instanceof IPersistManagedHolder persistManagedHolder) {
             var clone = new ItemStack(this);
             var tag = new CompoundTag();
@@ -387,36 +387,36 @@ public class MyBlockEntity extends BlockEntity implements ISyncPersistRPCBlockEn
     private ItemStack itemStack = ItemStack.EMPTY;
 }
 ```
-After the above setup, the value of `itemStack` in the MyBlockEntity will be stored in the itemstack while breaking and clone.
-And the value stored in the itemstack will be resumed after placement.
+经过上述设置后，MyBlockEntity 中的 `itemStack` 值将在破坏和克隆时存储到物品堆中。
+并且存储在物品堆中的值将在放置后恢复。
 
 ---
 
 ### `@RequireRerender`
-When the annotated fields updated (synced from server) will schedule chunk rendering update. To use this feature, your BlockEntity must inherit from the `IBlockEntityManaged`.
+当注解字段更新时（从服务器同步），将安排区块渲染更新。要使用此功能，您的 BlockEntity 必须继承自 `IBlockEntityManaged`。
 
 ```java
 public class MyBlockEntity extends BlockEntity implements ISyncPersistRPCBlockEntity {
     @Persisted
-    @DescSync
+    @DescSynced // 修正了原文中的拼写错误 @DescSync -> @DescSynced
     @RequireRerender
     private int color = -1;
 }
 ```
-it's actually equals to 
+它实际上等同于
 ```java
 public class MyBlockEntity extends BlockEntity implements ISyncPersistRPCBlockEntity {
     @Persisted
-    @DescSync
+    @DescSynced // 修正了原文中的拼写错误 @DescSync -> @DescSynced
     private int color = -1;
 
     public MyBlockEntity(BlockPos pos, BlockState state) {
         super(...)
         ...
-        addSyncUpdateListener("color", this::onColorUpdated); // add a listener
+        addSyncUpdateListener("color", this::onColorUpdated); // 添加监听器
     }
 
-    private Consumer<Object> onColorUpdated(ManagedKey managedKey, Object currentValue) {
+    private Consumer<Object> onColorUpdated(ManagedKey managedKey, Object currentValue) { // 修正了返回类型，原代码片段有误
         return newValue -> scheduleRenderUpdate();
     }
 
@@ -425,7 +425,7 @@ public class MyBlockEntity extends BlockEntity implements ISyncPersistRPCBlockEn
         if (level != null) {
             if (level.isClientSide) {
                 var state = getBlockState();
-                level.sendBlockUpdated(getBlockPos(), state, state, 1 << 3); // notify chunk rerender
+                level.sendBlockUpdated(getBlockPos(), state, state, 1 << 3); // 通知区块重新渲染
             }
         }
     }

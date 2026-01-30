@@ -1,8 +1,8 @@
-# Manage BlockEntity
+# 管理 BlockEntity
 {{ version_badge("2.1.0", label="Since", icon="tag") }}
 
-By implementing `ISyncPersistRPCBlockEntity`, you are able to delegate all synchronization and persistence code to LDLib2. 
-You don't need any additional code, just setup `syncStorage` and annotations.
+通过实现 `ISyncPersistRPCBlockEntity`，你可以将所有同步和持久化代码委托给 LDLib2。
+你不需要任何额外的代码，只需设置好 `syncStorage` 和注解即可。
 
 ```java
 public class MyBlockEntity extends BlockEntity implements ISyncPersistRPCBlockEntity {
@@ -29,19 +29,18 @@ public class MyBlockEntity extends BlockEntity implements ISyncPersistRPCBlockEn
 
     @RPCMethod
     public void rpcMsg(String msg) {
-    if (level.isClient) { // receive 
+    if (level.isClient) { // 接收端
         LDLib2.LOGGER.info("Received RPC from server: {}", message);
-    } else { // send
+    } else { // 发送端
         rpcToTracking("rpcMsg", msg)
     }
 }
 ```
 
 !!! note
-    Actually, `ISyncPersistRPCBlockEntity` is consisted of `ISyncBlockEntity`, `IRPCBlockEntity`, `IPersistManagedHolder`, `IBlockEntityManaged`.
-    You can choose partial of them if nonly few features are necessary or you want to fine-grained control.
+    实际上，`ISyncPersistRPCBlockEntity` 由 `ISyncBlockEntity`、`IRPCBlockEntity`、`IPersistManagedHolder`、`IBlockEntityManaged` 组成。
+    如果你只需要其中部分功能，或者想要进行更精细的控制，可以选择只实现它们中的一部分。
 
 !!! warning
-    If you have `useAsyncThread()` enabled (return ture by default). You have to be careful of thread safe issue. For example, `notifyPersistence()` will be triggered in a thread.
-    In general, you don't need to worry it, LDLib2 will handle all cases.
-
+    如果你启用了 `useAsyncThread()`（默认返回 true）。你必须注意线程安全问题。例如，`notifyPersistence()` 将在一个线程中被触发。
+    通常，你不需要担心它，LDLib2 会处理所有情况。

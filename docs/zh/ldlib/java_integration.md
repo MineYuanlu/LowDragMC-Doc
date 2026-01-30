@@ -1,6 +1,6 @@
-# Java Integration
+# Java 集成
 
-You can find the latest version from our [maven](https://maven.firstdark.dev/#/snapshots/com/lowdragmc).
+您可以从我们的 [maven](https://maven.firstdark.dev/#/snapshots/com/lowdragmc) 仓库找到最新版本。
 
 ``` c
 repositories{

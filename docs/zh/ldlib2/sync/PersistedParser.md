@@ -1,8 +1,8 @@
 # PersistedParser
 
-PersistedParser is a tool class to serialize and deserialize the object fields with `@Persisted` or `@Configurable` annotation.
+PersistedParser 是一个工具类，用于序列化和反序列化带有 `@Persisted` 或 `@Configurable` 注解的对象的字段。
 
-## Serialization
+## 序列化
 
 ```java
 @EqualsAndHashCode
@@ -27,7 +27,7 @@ var data = PersistedParser.deserialize(JsonOps.INSTANCE, output, newInstance, pr
 System.out.println(newInstance.equals(instance));
 ```
 
-Console log should be
+控制台输出应为
 
 ```json
 {
@@ -38,8 +38,8 @@ Console log should be
 true
 ```
 
-## Create Codec
-Another useful tool provided by the PersistedParser is to create a Codec based on annotations.
+## 创建 Codec
+PersistedParser 提供的另一个有用工具是基于注解创建 Codec。
 
 ```java
  public class MyObject implements IPersistedSerializable {
@@ -54,7 +54,7 @@ Another useful tool provided by the PersistedParser is to create a Codec based o
 }
 ```
 
-equals to 
+等同于
 
 ```java
 public class MyObject {
@@ -87,4 +87,3 @@ public class MyObject {
     }
 }
 ```
-

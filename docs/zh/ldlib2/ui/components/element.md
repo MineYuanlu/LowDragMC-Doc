@@ -2,16 +2,16 @@
 
 {{ version_badge("2.1.0", label="Since", icon="tag") }}
 
-`UIElement` is the most fundamental and commonly used UI component in LDLib2.
-All UI components inherit from it.
+`UIElement` 是 LDLib2 中最基础且最常用的 UI 组件。
+所有 UI 组件都继承自它。
 
-Conceptually, it is similar to the `#!html <div/>` element in HTML: a general-purpose container that can be styled, laid out, and extended with behaviors.
+从概念上讲，它类似于 HTML 中的 `#!html <div/>` 元素：一个通用的容器，可以进行样式化、布局，并通过行为进行扩展。
 
-Because of that, everything introduced in this page also applies to all other UI components in LDLib2—so please make sure to read it carefully.
+因此，本页介绍的所有内容同样适用于 LDLib2 中的所有其他 UI 组件——所以请务必仔细阅读。
 
 ---
 
-## Usages
+## 用法
 
 === "Java"
 
@@ -34,12 +34,13 @@ Because of that, everything introduced in this page also applies to all other UI
     element.addEventListener(UIEvents.MOUSE_DOWN, e => e.currentElement.focus());
     root.addChild(element);
     ```
+
 ---
 
 ## Xml
 ```xml
 <element id="my_id" class="class1 class2" focusable="false" visible="true" active="true" style="background: #fff; width: 50">
-    <!-- add children here -->
+    <!-- 在此添加子元素 -->
     <button text="click me!"/>
     <inventory-slots/>
 </element>
@@ -47,12 +48,12 @@ Because of that, everything introduced in this page also applies to all other UI
 
 ---
 
-## Styles
+## 样式
 
-!!! note "Layout"
-    layout attributes are actually styles as well.
+!!! note "布局"
+    布局属性实际上也是样式。
 
-UIElement styles (include layouts) can be accessed as below:
+UIElement 的样式（包括布局）可以通过以下方式访问：
 === "Java"
 
     ```java
@@ -65,25 +66,26 @@ UIElement styles (include layouts) can be accessed as below:
 === "KubeJS"
 
     ```js
-    element.style(style -=> style.background(...));
+    element.style(style => style.background(...));
     element.layout(layout => layout.width(...));
     element.getStyle().background(...);
     element.getLayout().width(...);
     ```
-### Layout Properties
 
-You'd better read [Layout](../preliminary/layout.md){ data-preview } before using.
+### 布局属性
+
+使用前最好先阅读 [布局](../preliminary/layout.md){ data-preview }。
 
 !!! info ""
     #### <p style="font-size: 1rem;">display</p>
 
-    Controls whether the element participates in layout. `FLEX` enables normal layout, `NONE` removes the element from layout calculation. `CONTENTS` doesn't affect layout but render its children.
+    控制元素是否参与布局。`FLEX` 启用正常布局，`NONE` 将元素从布局计算中移除。`CONTENTS` 不影响布局但会渲染其子元素。
 
     === "Java"
 
         ```java
         layout.display(YogaDisplay.FLEX);
-        element.setDisplay(false); // equals to layout.display(YogaDisplay.NONE);
+        element.setDisplay(false); // 等同于 layout.display(YogaDisplay.NONE);
         ```
 
     === "LSS"
@@ -97,7 +99,7 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 !!! info ""
     #### <p style="font-size: 1rem;">layout-direction</p>
 
-    Sets the layout direction. Usually inherited from parent.
+    设置布局方向。通常从父元素继承。
 
     === "Java"
 
@@ -116,7 +118,7 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 !!! info ""
     #### <p style="font-size: 1rem;">flex-basis</p>
 
-    Sets the initial main size before flex grow/shrink. Supports **point**, **percent**, and **auto**.
+    设置在 flex 增长/收缩之前的主轴初始大小。支持 **点**、**百分比** 和 **自动** 模式。
 
     === "Java"
 
@@ -135,7 +137,7 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 !!! info ""
     #### <p style="font-size: 1rem;">flex</p>
 
-    Makes the element flexible along the main axis.
+    使元素沿主轴灵活伸缩。
 
     === "Java"
 
@@ -154,7 +156,7 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 !!! info ""
     #### <p style="font-size: 1rem;">flex-grow</p>
 
-    Controls how much the element grows when extra space is available.
+    控制当有额外空间时，元素的增长程度。
 
     === "Java"
 
@@ -173,7 +175,7 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 !!! info ""
     #### <p style="font-size: 1rem;">flex-shrink</p>
 
-    Controls how much the element shrinks when space is insufficient.
+    控制当空间不足时，元素的收缩程度。
 
     === "Java"
 
@@ -192,7 +194,7 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 !!! info ""
     #### <p style="font-size: 1rem;">flex-direction</p>
 
-    Defines the main axis direction, e.g. `ROW` or `COLUMN`.
+    定义主轴方向，例如 `ROW` 或 `COLUMN`。
 
     === "Java"
 
@@ -211,7 +213,7 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 !!! info ""
     #### <p style="font-size: 1rem;">flex-wrap</p>
 
-    Controls whether children wrap into multiple lines.
+    控制子元素是否换行。
 
     === "Java"
 
@@ -230,7 +232,7 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 !!! info ""
     #### <p style="font-size: 1rem;">position</p>
 
-    Sets positioning mode. `RELATIVE` participates in layout, `ABSOLUTE` does not affect siblings.
+    设置定位模式。`RELATIVE` 参与布局，`ABSOLUTE` 不影响兄弟元素。
 
     === "Java"
 
@@ -249,7 +251,7 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 !!! info ""
     #### <p style="font-size: 1rem;">top / right / bottom / left / start / end / horizontal / vertical / all</p>
 
-    Offsets used when `position` is `RELATIVE` or `ABSOLUTE`.
+    当 `position` 为 `RELATIVE` 或 `ABSOLUTE` 时使用的偏移量。
 
     === "Java"
 
@@ -270,11 +272,11 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
         ```
 
 !!! info ""
-    #### <p style="font-size: 1rem;">margin-*</p> 
-    
+    #### <p style="font-size: 1rem;">margin-*</p>
+
     `*`: top / right / bottom / left / start / end / horizontal / vertical / all
 
-    Sets outer spacing around the element.
+    设置元素周围的外边距。
 
     === "Java"
 
@@ -297,7 +299,7 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 
     `*`: top / right / bottom / left / start / end / horizontal / vertical / all
 
-    Sets inner spacing between border and content.
+    设置边框与内容之间的内边距。
 
     === "Java"
 
@@ -318,7 +320,7 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 
     `*`: top / right / bottom / left / start / end / horizontal / vertical / all
 
-    Sets spacing between children in flex layouts.
+    设置弹性布局中子元素之间的间距。
 
     === "Java"
 
@@ -337,7 +339,7 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 !!! info ""
     #### <p style="font-size: 1rem;">width</p>
 
-    Sets element width. Supports **point**, **percent**, and **auto** modes.
+    设置元素宽度。支持 **点**、**百分比** 和 **自动** 模式。
 
     === "Java"
 
@@ -358,7 +360,7 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 !!! info ""
     #### <p style="font-size: 1rem;">height</p>
 
-    Sets element height. Supports **point**, **percent**, and **auto** modes.
+    设置元素高度。支持 **点**、**百分比** 和 **自动** 模式。
 
     === "Java"
 
@@ -377,7 +379,7 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 !!! info ""
     #### <p style="font-size: 1rem;">min-width / min-height</p>
 
-    Sets the minimum size constraint.
+    设置最小尺寸约束。
 
     === "Java"
 
@@ -396,7 +398,7 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 !!! info ""
     #### <p style="font-size: 1rem;">max-width / max-height</p>
 
-    Sets the maximum size constraint.
+    设置最大尺寸约束。
 
     === "Java"
 
@@ -415,7 +417,7 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 !!! info ""
     #### <p style="font-size: 1rem;">aspect-rate</p>
 
-    Locks width–height ratio. Useful for square or icon elements.
+    锁定宽高比。对于方形或图标元素很有用。
 
     === "Java"
 
@@ -434,13 +436,13 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 !!! info ""
     #### <p style="font-size: 1rem;">overflow</p>
 
-    Controls how overflowing content is handled. If 'hidden', the content beyond the boundary will be hidden.
+    控制如何处理溢出内容。如果设为 'hidden'，边界之外的内容将被隐藏。
 
     === "Java"
 
         ```java
         layout.overflow(YogaOverflow.HIDDEN);
-        element.setOverflowVisible(false); // equals to layout.overflow(YogaOverflow.HIDDEN);
+        element.setOverflowVisible(false); // 等同于 layout.overflow(YogaOverflow.HIDDEN);
         ```
 
     === "LSS"
@@ -454,7 +456,7 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 !!! info ""
     #### <p style="font-size: 1rem;">align-items</p>
 
-    Aligns children along the cross axis (container property).
+    沿交叉轴对齐子元素（容器属性）。
 
     === "Java"
 
@@ -473,7 +475,7 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 !!! info ""
     #### <p style="font-size: 1rem;">justify-content</p>
 
-    Aligns children along the main axis (container property).
+    沿主轴对齐子元素（容器属性）。
 
     === "Java"
 
@@ -492,7 +494,7 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 !!! info ""
     #### <p style="font-size: 1rem;">align-self</p>
 
-    Overrides cross-axis alignment for a single element.
+    覆盖单个元素的交叉轴对齐方式。
 
     === "Java"
 
@@ -511,7 +513,7 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 !!! info ""
     #### <p style="font-size: 1rem;">align-content</p>
 
-    Aligns wrapped lines when `flex-wrap` is enabled.
+    当启用 `flex-wrap` 时，对齐换行后的行。
 
     === "Java"
 
@@ -529,13 +531,12 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 
 ---
 
-### Basic Properties
+### 基础属性
 
 !!! info ""
     #### <p style="font-size: 1rem;">background</p>
 
-    Sets the background rendering of below the element, such as color, rect, image.
-
+    设置在元素内容下方的背景渲染，例如颜色、矩形、图像。
 
     === "Java"
 
@@ -544,7 +545,7 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
         ```
 
     === "LSS"
-        Check [Texture in LSS](../textures/lss.md) for lss supports.
+        关于 lss 支持，请查看 [LSS 中的纹理](../textures/lss.md)。
 
         ```css
         element {
@@ -557,7 +558,7 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 !!! info ""
     #### <p style="font-size: 1rem;">overlay</p>
 
-    Controls overlay rendering drawn above the element content.
+    控制在元素内容上方绘制的覆盖层渲染。
 
     === "Java"
 
@@ -566,7 +567,7 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
         ```
 
     === "LSS"
-        Check [Texture in LSS](../textures/lss.md) for lss supports.
+        关于 lss 支持，请查看 [LSS 中的纹理](../textures/lss.md)。
 
         ```css
         element {
@@ -579,7 +580,7 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 !!! info ""
     #### <p style="font-size: 1rem;">tooltips</p>
 
-    Defines tooltip content displayed when hovering the element.
+    定义当鼠标悬停在元素上时显示的工具提示内容。
 
     === "Java"
 
@@ -592,14 +593,14 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 
         ```css
         element {
-            tooltips: this is my tooltips;
+            tooltips: 这是我的工具提示;
         }
         ```
 
 !!! info ""
     #### <p style="font-size: 1rem;">z-index</p>
 
-    Controls the stacking order of the element. Higher values appear above lower ones.
+    控制元素的堆叠顺序。数值较大的元素显示在数值较小的元素之上。
 
     === "Java"
 
@@ -618,7 +619,7 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 !!! info ""
     #### <p style="font-size: 1rem;">opacity</p>
 
-    Sets the transparency level of the element. `0` is fully transparent, `1` is fully opaque.
+    设置元素的透明度等级。`0` 为完全透明，`1` 为完全不透明。
 
     === "Java"
 
@@ -634,16 +635,15 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
         }
         ```
 
-
 !!! info ""
     #### <p style="font-size: 1rem;">overflow-clip</p>
 
-    If element's overflow is set `hidden`, clips elements rendering based on given texture's red channel. 
+    如果元素的 overflow 设为 `hidden`，则根据给定纹理的红色通道裁剪元素渲染。
 
     <div style="text-align: center;">
         <video controls>
         <source src="../../assets/overflow-clip.mp4" type="video/mp4">
-        Your browser does not support video.
+        您的浏览器不支持视频。
         </video>
     </div>
 
@@ -654,7 +654,7 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
         ```
 
     === "LSS"
-        Check [Texture in LSS](../textures/lss.md) for lss supports.
+        关于 lss 支持，请查看 [LSS 中的纹理](../textures/lss.md)。
 
         ```css
         element {
@@ -665,7 +665,7 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 !!! info ""
     #### <p style="font-size: 1rem;">transform-2d</p>
 
-    Applies 2D transformations such as translate, scale, or rotate.
+    应用 2D 变换，例如平移、缩放或旋转。
 
     === "Java"
 
@@ -686,12 +686,12 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
 !!! info ""
     #### <p style="font-size: 1rem;">transition</p>
 
-    Defines animated transitions between property changes.
+    定义属性变化之间的动画过渡效果。
 
     <div style="text-align: center;">
         <video controls>
         <source src="../../assets/transition.mp4" type="video/mp4">
-        Your browser does not support video.
+        您的浏览器不支持视频。
         </video>
     </div>
 
@@ -711,21 +711,20 @@ You'd better read [Layout](../preliminary/layout.md){ data-preview } before usin
         }
         ```
 
-
 ---
-## States
+## 状态
 
 ### `isVisible`
-When `isVisible` is set to `false`, the element and all of its children will no longer be rendered.  
-Unlike `display: NONE`, this does **not** affect layout calculation.  
-Elements with `isVisible = false` are also excluded from hit-testing, so many UI events (such as clicks) will not be triggered.
+当 `isVisible` 设置为 `false` 时，该元素及其所有子元素将不再被渲染。
+与 `display: NONE` 不同，这**不会**影响布局计算。
+`isVisible = false` 的元素也会被排除在命中测试之外，因此许多 UI 事件（如点击）将不会被触发。
 
 ### `isActive`
-When `isActive` is set to `false`, the element may lose its interactive behavior—for example, buttons can no longer be clicked—and the element will no longer receive `tick` events.
+当 `isActive` 设置为 `false` 时，元素可能会失去其交互行为——例如，按钮无法再被点击——并且元素将不再接收 `tick` 事件。
 
 !!! note
-    When `isActive` is set to `false`, a `__disabled__` class is automatically added to the element.  
-    You can use the following LSS selectors to style active and inactive states:
+    当 `isActive` 设置为 `false` 时，会自动向元素添加一个 `__disabled__` 类。
+    你可以使用以下 LSS 选择器来设置活动和非活动状态的样式：
 
     ```css
     selector.__disabled__ {
@@ -736,12 +735,12 @@ When `isActive` is set to `false`, the element may lose its interactive behavior
     ```
 
 ### `focusable`
-Elements are `focusable: false` by default. Some components, such as `TextField`, are focusable by design, but you can still manually change an element’s focusable state.  
-Only when `focusable` is set to `true` can an element be focused via `focus()` or by mouse interaction.
+元素默认是 `focusable: false`。有些组件（如 `TextField`）在设计上是可聚焦的，但你仍然可以手动更改元素的可聚焦状态。
+只有当 `focusable` 设置为 `true` 时，元素才能通过 `focus()` 或鼠标交互获得焦点。
 
 !!! note
-    When an element is in the `focused` state, a `__focused__` class is automatically added.  
-    You can style focused and unfocused states using the following LSS selectors:
+    当元素处于 `focused`（已聚焦）状态时，会自动添加一个 `__focused__` 类。
+    你可以使用以下 LSS 选择器来设置已聚焦和未聚焦状态的样式：
 
     ```css
     selector.__focused__ {
@@ -752,24 +751,25 @@ Only when `focusable` is set to `true` can an element be focused via `focus()` o
     ```
 
 ### `isInternalUI`
-This is a special state that indicates whether an element is an internal part of a component.  
-For example, a `button` contains an internal `text` element used for rendering its label.
+这是一个特殊状态，表示一个元素是否是组件的内部部分。
+例如，一个 `button` 包含一个用于渲染其标签的内部 `text` 元素。
 
-Semantically, internal elements are not allowed to be added, removed, or reordered directly.  
-However, you can still edit their styles and manage their child elements via the editor or XML.  
-In the editor, internal elements are displayed in gray in the hierarchy view.
+从语义上讲，不允许直接添加、移除或重新排序内部元素。
+但是，你仍然可以通过编辑器或 XML 编辑它们的样式并管理它们的子元素。
+在编辑器中，内部元素在层级视图中显示为灰色。
 
-In XML, you can access internal elements using the `#!xml <internal index="..."/>` tag, where `index` specifies which internal element to reference:
+在 XML 中，你可以使用 `#!xml <internal index="..."/>` 标签访问内部元素，其中 `index` 指定要引用的内部元素：
 
 ```xml
 <button>
-    <!-- obtain the internal text component here -->
+    <!-- 在这里获取内部文本组件 -->
     <internal index="0">
     </internal>
 </button>
 ```
+
 !!! note ""
-    In LSS, you can use :host and :internal to explicitly target host or internal elements. By default, selectors match both unless constrained.
+    在 LSS 中，你可以使用 :host 和 :internal 来明确指定宿主元素或内部元素。默认情况下，选择器会匹配两者，除非加以限制。
     ```css
     button > text {
     }
@@ -780,120 +780,123 @@ In XML, you can access internal elements using the `#!xml <internal index="..."/
     button > text:host {
     }
     ```
----
-
-## Fields
-
-> Only public or protected fields that are externally observable or configurable are listed.
-
-| Name           | Type          | Access                  | Description                                              |
-| -------------- | ------------- | ----------------------- | -------------------------------------------------------- |
-| `layoutNode`   | `YogaNode`    | protected (getter)      | Underlying Yoga node used for layout calculation.        |
-| `modularUI`    | `ModularUI`   | private (getter)        | The `ModularUI` instance this element belongs to.        |
-| `id`           | `String`      | private (getter/setter) | Element ID, used by selectors and queries.               |
-| `classes`      | `Set<String>` | private (getter)        | CSS-like class list applied to this element.             |
-| `styleBag`     | `StyleBag`    | private (getter)        | Stores resolved style candidates and computed styles.    |
-| `styles`       | `List<Style>` | private (getter)        | Inline styles attached to this element.                  |
-| `layoutStyle`  | `LayoutStyle` | private (getter)        | Layout-related style wrapper (Yoga-based).               |
-| `style`        | `BasicStyle`  | private (getter)        | Basic visual styles (background, opacity, zIndex, etc.). |
-| `isVisible`    | `boolean`     | private (getter/setter) | Whether the element is visible.                          |
-| `isActive`     | `boolean`     | private (getter/setter) | Whether the element participates in logic and events.    |
-| `focusable`    | `boolean`     | private (getter/setter) | Whether the element can receive focus.                   |
-| `isInternalUI` | `boolean`     | private (getter)        | Marks internal (component-owned) elements.               |
 
 ---
 
-## Methods
+## 字段
 
-### Layout & Geometry
+> 仅列出外部可观察或可配置的公共或受保护字段。
 
-| Method                        | Signature                                 | Description                                              |
-| ----------------------------- | ----------------------------------------- | -------------------------------------------------------- |
-| `getLayout()`                 | `LayoutStyle`                             | Returns the layout style controller.                     |
-| `layout(...)`                 | `UIElement layout(Consumer<LayoutStyle>)` | Modify layout properties fluently.                       |
-| `node(...)`                   | `UIElement node(Consumer<YogaNode>)`      | Directly modify the underlying Yoga node.                |
-| `getPositionX()`              | `float`                                   | Absolute X position on screen.                           |
-| `getPositionY()`              | `float`                                   | Absolute Y position on screen.                           |
-| `getSizeWidth()`              | `float`                                   | Computed width of the element.                           |
-| `getSizeHeight()`             | `float`                                   | Computed height of the element.                          |
-| `getContentX()`               | `float`                                   | X position of content area (excluding border & padding). |
-| `getContentY()`               | `float`                                   | Y position of content area.                              |
-| `getContentWidth()`           | `float`                                   | Width of content area.                                   |
-| `getContentHeight()`          | `float`                                   | Height of content area.                                  |
-| `adaptPositionToScreen()`     | `void`                                    | Adjusts position to stay within screen bounds.           |
-| `adaptPositionToElement(...)` | `void`                                    | Adjusts position to stay inside another element.         |
-
----
-
-### Tree Structure
-
-| Method               | Signature                             | Description                                       |
-| -------------------- | ------------------------------------- | ------------------------------------------------- |
-| `getParent()`        | `UIElement`                           | Returns parent element, or `null`.                |
-| `getChildren()`      | `List<UIElement>`                     | Returns an unmodifiable list of children.         |
-| `addChild(...)`      | `UIElement addChild(UIElement)`       | Adds a child element.                             |
-| `addChildren(...)`   | `UIElement addChildren(UIElement...)` | Adds multiple children.                           |
-| `removeChild(...)`   | `boolean removeChild(UIElement)`      | Removes a child element.                          |
-| `removeSelf()`       | `boolean`                             | Removes this element from its parent.             |
-| `clearAllChildren()` | `void`                                | Removes all children.                             |
-| `isAncestorOf(...)`  | `boolean`                             | Checks if this element is an ancestor of another. |
-| `getStructurePath()` | `ImmutableList<UIElement>`            | Path from root to this element.                   |
+| 名称            | 类型            | 访问权限                 | 描述                                             |
+| --------------- | --------------- | ------------------------ | ------------------------------------------------ |
+| `layoutNode`    | `YogaNode`      | protected (getter)       | 用于布局计算的基础 Yoga 节点。                   |
+| `modularUI`     | `ModularUI`     | private (getter)         | 此元素所属的 `ModularUI` 实例。                  |
+| `id`            | `String`        | private (getter/setter)  | 元素 ID，用于选择器和查询。                      |
+| `classes`       | `Set<String>`   | private (getter)         | 应用于此元素的类似 CSS 的类列表。                |
+| `styleBag`      | `StyleBag`      | private (getter)         | 存储已解析的样式候选值和计算后的样式。           |
+| `styles`        | `List<Style>`   | private (getter)         | 附加到此元素的内联样式。                         |
+| `layoutStyle`   | `LayoutStyle`   | private (getter)         | 布局相关样式的包装器（基于 Yoga）。              |
+| `style`         | `BasicStyle`    | private (getter)         | 基础视觉样式（背景、不透明度、zIndex 等）。      |
+| `isVisible`     | `boolean`       | private (getter/setter)  | 元素是否可见。                                   |
+| `isActive`      | `boolean`       | private (getter/setter)  | 元素是否参与逻辑和事件。                         |
+| `focusable`     | `boolean`       | private (getter/setter)  | 元素是否可以获得焦点。                           |
+| `isInternalUI`  | `boolean`       | private (getter)         | 标记内部（组件拥有的）元素。                     |
 
 ---
 
-### Style & Classes
+## 方法
 
-| Method             | Signature                                    | Description                                         |
-| ------------------ | -------------------------------------------- | --------------------------------------------------- |
-| `style(...)`       | `UIElement style(Consumer<BasicStyle>)`      | Modify inline visual styles.                        |
-| `lss(...)`         | `UIElement lss(String, Object)`              | Apply a stylesheet-style property programmatically. |
-| `addClass(...)`    | `UIElement addClass(String)`                 | Adds a CSS-like class.                              |
-| `removeClass(...)` | `UIElement removeClass(String)`              | Removes a class.                                    |
-| `hasClass(...)`    | `boolean`                                    | Checks if the class exists.                         |
-| `transform(...)`   | `UIElement transform(Consumer<Transform2D>)` | Applies a 2D transform.                             |
-| `animation()`      | `StyleAnimation`                             | Starts a style animation targeting this element.    |
-| `animation(a -> {})`| `StyleAnimation`                            | Starts a style animation targeting this element. (always works, when the `ModularUI` valid)    |
+### 布局与几何
 
----
-
-### Focus & Interaction
-
-| Method           | Signature     | Description                                          |
-| ---------------- | ------------- | ---------------------------------------------------- |
-| `focus()`        | `void`        | Requests focus for this element.                     |
-| `blur()`         | `void`        | Clears focus if this element is focused.             |
-| `isFocused()`    | `boolean`     | Returns true if this element is focused.             |
-| `isHover()`      | `boolean`     | Returns true if mouse is directly over this element. |
-| `isSelfOrChildHover()` | `boolean`     | Returns true if a slef or child is hovered.                  |
-| `startDrag(...)` | `DragHandler` | Starts a drag operation.                             |
+| 方法                        | 签名                                    | 描述                                             |
+| --------------------------- | --------------------------------------- | ------------------------------------------------ |
+| `getLayout()`               | `LayoutStyle`                           | 返回布局样式控制器。                             |
+| `layout(...)`               | `UIElement layout(Consumer<LayoutStyle>)` | 以流式方式修改布局属性。                         |
+| `node(...)`                 | `UIElement node(Consumer<YogaNode>)`    | 直接修改底层的 Yoga 节点。                       |
+| `getPositionX()`            | `float`                                 | 屏幕上的绝对 X 坐标。                            |
+| `getPositionY()`            | `float`                                 | 屏幕上的绝对 Y 坐标。                            |
+| `getSizeWidth()`            | `float`                                 | 元素的计算宽度。                                 |
+| `getSizeHeight()`           | `float`                                 | 元素的计算高度。                                 |
+| `getContentX()`             | `float`                                 | 内容区域的 X 坐标（不包括边框和内边距）。        |
+| `getContentY()`             | `float`                                 | 内容区域的 Y 坐标。                              |
+| `getContentWidth()`         | `float`                                 | 内容区域的宽度。                                 |
+| `getContentHeight()`        | `float`                                 | 内容区域的高度。                                 |
+| `adaptPositionToScreen()`   | `void`                                  | 调整位置以保持在屏幕边界内。                     |
+| `adaptPositionToElement(...)` | `void`                                | 调整位置以保持在另一个元素内部。                 |
 
 ---
 
-### Events
+### 树结构
 
-| Method                               | Signature                                                      | Description                              |
-| ------------------------------------ | -------------------------------------------------------------- | ---------------------------------------- |
-| `addEventListener(...)`              | `UIElement addEventListener(String, UIEventListener)`          | Registers a bubble-phase event listener. |
-| `addEventListener(..., true)`        | `UIElement addEventListener(String, UIEventListener, boolean)` | Registers a capture-phase listener.      |
-| `removeEventListener(...)`           | `void`                                                         | Removes an event listener.               |
-| `stopInteractionEventsPropagation()` | `UIElement`                                                    | Stops mouse & drag event propagation.    |
-
----
-
-### Client–Server Sync & RPC
-
-| Method                     | Signature   | Description                                |
-| -------------------------- | ----------- | ------------------------------------------ |
-| `addSyncValue(...)`        | `UIElement` | Registers a synced value.                  |
-| `removeSyncValue(...)`     | `UIElement` | Unregisters a synced value.                |
-| `addRPCEvent(...)`         | `UIElement` | Registers an RPC event.                    |
-| `sendEvent(...)`           | `void`      | Sends an RPC event to server.              |
-| `sendEvent(..., callback)` | `<T> void`  | Sends an RPC event with response callback. |
+| 方法               | 签名                             | 描述                                       |
+| ------------------ | -------------------------------- | ------------------------------------------ |
+| `getParent()`      | `UIElement`                      | 返回父元素，或 `null`。                    |
+| `getChildren()`    | `List<UIElement>`                | 返回一个不可修改的子元素列表。             |
+| `addChild(...)`    | `UIElement addChild(UIElement)`  | 添加一个子元素。                           |
+| `addChildren(...)` | `UIElement addChildren(UIElement...)` | 添加多个子元素。                     |
+| `removeChild(...)` | `boolean removeChild(UIElement)` | 移除一个子元素。                           |
+| `removeSelf()`     | `boolean`                        | 从其父元素中移除此元素。                   |
+| `clearAllChildren()` | `void`                         | 移除所有子元素。                           |
+| `isAncestorOf(...)`| `boolean`                        | 检查此元素是否是另一个元素的祖先。         |
+| `getStructurePath()` | `ImmutableList<UIElement>`     | 从根元素到此元素的路径。                   |
 
 ---
 
-### Rendering
+### 样式与类
 
-| Method                       | Signature | Description                            |
-| ---------------------------- | --------- | -------------------------------------- |
-| `isDisplayed()`              | `boolean` | Returns true if display is not `NONE`. |
+| 方法             | 签名                                    | 描述                                         |
+| ---------------- | --------------------------------------- | -------------------------------------------- |
+| `style(...)`     | `UIElement style(Consumer<BasicStyle>)` | 修改内联视觉样式。                           |
+| `lss(...)`       | `UIElement lss(String, Object)`         | 以编程方式应用样式表风格的属性。             |
+| `addClass(...)`  | `UIElement addClass(String)`            | 添加一个类似 CSS 的类。                      |
+| `removeClass(...)` | `UIElement removeClass(String)`       | 移除一个类。                                 |
+| `hasClass(...)`  | `boolean`                               | 检查类是否存在。                             |
+| `transform(...)` | `UIElement transform(Consumer<Transform2D>)` | 应用 2D 变换。                          |
+| `animation()`    | `StyleAnimation`                        | 开始一个以此元素为目标的样式动画。           |
+| `animation(a -> {})`| `StyleAnimation`                    | 开始一个以此元素为目标的样式动画。（当 `ModularUI` 有效时总是可用） |
+
+---
+
+### 焦点与交互
+
+| 方法           | 签名     | 描述                                          |
+| -------------- | -------- | --------------------------------------------- |
+| `focus()`      | `void`   | 请求此元素获得焦点。                          |
+| `blur()`       | `void`   | 如果此元素已聚焦，则清除其焦点。              |
+| `isFocused()`  | `boolean`| 如果此元素已聚焦，则返回 true。               |
+| `isHover()`    | `boolean`| 如果鼠标直接悬停在此元素上，则返回 true。     |
+| `isSelfOrChildHover()` | `boolean` | 如果自身或子元素被悬停，则返回 true。      |
+| `startDrag(...)` | `DragHandler` | 开始一个拖拽操作。                     |
+
+---
+
+### 事件
+
+| 方法                               | 签名                                                      | 描述                              |
+| ---------------------------------- | --------------------------------------------------------- | --------------------------------- |
+| `addEventListener(...)`            | `UIElement addEventListener(String, UIEventListener)`     | 注册一个冒泡阶段的事件监听器。    |
+| `addEventListener(..., true)`      | `UIElement addEventListener(String, UIEventListener, boolean)` | 注册一个捕获阶段的监听器。 |
+| `removeEventListener(...)`         | `void`                                                    | 移除一个事件监听器。              |
+| `stopInteractionEventsPropagation()` | `UIElement`                                             | 停止鼠标和拖拽事件的传播。        |
+
+---
+
+### 客户端-服务器同步与 RPC
+
+| 方法                     | 签名   | 描述                                |
+| ------------------------ | ------ | ----------------------------------- |
+| `addSyncValue(...)`      | `UIElement` | 注册一个同步值。                    |
+| `removeSyncValue(...)`   | `UIElement` | 注销一个同步值。                    |
+| `addRPCEvent(...)`       | `UIElement` | 注册一个 RPC 事件。                 |
+| `sendEvent(...)`         | `void` | 向服务器发送一个 RPC 事件。         |
+| `sendEvent(..., callback)` | `<T> void` | 发送一个带有响应回调的 RPC 事件。 |
+
+---
+
+### 渲染
+
+| 方法                       | 签名 | 描述                            |
+| -------------------------- | ---- | ------------------------------- |
+| `isDisplayed()`            | `boolean` | 如果 display 不是 `NONE`，则返回 true。 |
+| `isRendered()`            | `boolean` | 如果元素当前被渲染，则返回 true。 |
+| `isDragged()`             | `boolean` | 如果元素当前正被拖拽，则返回 true。 |

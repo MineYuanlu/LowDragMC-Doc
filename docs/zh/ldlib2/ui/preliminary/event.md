@@ -1,68 +1,67 @@
-# Event
+# 事件
 
 {{ version_badge("2.1.0", label="Since", icon="tag") }}
 
-LDLib2 UI provides events that communicate user actions or notifications to UI elements. The event system shares the same terminology and event naming as [HTML events](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Events#what_is_an_event).
+LDLib2 UI 提供了用于将用户操作或通知传递给 UI 元素的事件系统。该系统使用与 [HTML 事件](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Events#what_is_an_event) 相同的术语和事件命名。
 
 ---
 
-## Dispatch events
+## 派发事件
 
-The event system listens for events that come from the ModularUI or mannually triggers, then uses the `UIEventDispatcher` to dispatch those events to UI elements. The event dispatcher determines an appropriate dispatching strategy for each event it sends. Once determined, the dispatcher executes the strategy.
+事件系统监听来自 ModularUI 或手动触发的事件，然后使用 `UIEventDispatcher` 将这些事件分派给 UI 元素。事件分发器会为它发送的每个事件确定一个适当的分发策略。一旦确定，分发器就会执行该策略。
 
-### Event propagation
-Each event phase has its own dispatch behavior. The behavior of each event type breaks down into two stages:
+### 事件传播
+每个事件阶段都有其自己的分发行为。每种事件类型的行为分为两个阶段：
 
-- `Capture Phase`: Events sent to elements during the capture-down phase.
-- `Bubbles Phase`: Events sent to elements during the bubble-up phase.
+- `捕获阶段`：在向下捕获阶段发送给元素的事件。
+- `冒泡阶段`：在向上冒泡阶段发送给元素的事件。
 
-After the event dispatcher selects the event `target`, it computes the propagation path of the event. The propagation path is an ordered list of UI elements that receive the event. The propagation path occurs in the following order:
+事件分发器选择事件 `target` 后，会计算事件的传播路径。传播路径是一个按顺序接收事件的 UI 元素列表。传播路径按以下顺序进行：
 
-1. The path starts at the root of the UI element tree and descends towards the `target`. This is the capture-down phase.
-2. The event target receives the event.
-3. The event then ascends the tree towards the root. This is the bubble-up phase.
+1. 路径从 UI 元素树的根开始，向下朝向 `target` 元素。这是向下捕获阶段。
+2. 事件目标接收到事件。
+3. 事件然后向上朝向根元素冒泡。这是向上冒泡阶段。
 
 <figure markdown="span" style="width: 60%">
   ![alt text](../assets/event_phase.png)
-  <figcaption>Propagation path</figcaption>
+  <figcaption>传播路径</figcaption>
 </figure>
 
+大多数事件会沿着传播路径发送给所有元素。有些事件会跳过冒泡阶段，有些事件则仅发送给事件目标。
 
-Most event are sent to all elements along the propagation path. Some event skip the bubble-up phase, and some event are sent to the event target only.
+### 事件目标
 
-### Event target
+当 `UIEvent` 沿着传播路径移动时，`UIEvent.currentElement` 会更新为 **当前正在处理** 事件的元素。这使得很容易知道“哪个元素正在运行我的监听器”。
 
-As a `UIEvent` travels along the propagation path, `UIEvent.currentElement` is updated to the element that is **currently handling** the event. This makes it easy to know “which element is running my listener right now”.
+在事件监听器内部，LDLib2 区分两个重要的元素引用：
 
-Within an event listener, LDLib2 distinguishes two important element references:
+- **`UIEvent.target`**：事件 **起源** 的元素（分发目标）。
+- **`UIEvent.relatedTarget`（可选）**：在某些事件中可能涉及的其他元素。
+- **`UIEvent.currentElement`**：**当前正在执行** 监听器的元素。
 
-- **`UIEvent.target`**: the element where the event **originated** (the dispatch target).
-- **`UIEvent.relatedTarget`(Optional)**: the other element may be involved in some events.
-- **`UIEvent.currentElement`**: the element whose listener is **currently being executed**.
+`target` 在分发开始前确定，并且在传播过程中 **不会改变**。  
+`currentElement` 会随着分发器在树中移动（捕获 → 目标 → 冒泡）而改变。
 
-`target` is determined before dispatch begins and **does not change** during propagation.  
-`currentElement` changes as the dispatcher moves through the tree (capture → target → bubble).
+### 停止传播
 
-### Stopping propagation
-
-LDLib2 provides two levels of cancellation:
+LDLib2 提供两个级别的取消：
 
 - `event.stopPropagation()`  
-  Stops the event from reaching **later elements and later phases** (capture/bubble will cease).
+  阻止事件到达 **后续元素和后续阶段**（捕获/冒泡将停止）。
 
 - `event.stopImmediatePropagation()`  
-  Stops other listeners on the **current element** from running, and also stops further propagation.
+  阻止 **当前元素** 上的其他监听器运行，同时也阻止进一步传播。
 
 ---
 
-## Register event listeners
+## 注册事件监听器
 
-LDLib2 uses a **DOM-like event model**: events travel through the UI tree and a listener can be registered for either:
+LDLib2 使用 **类 DOM 事件模型**：事件在 UI 树中传播，可以为以下任一阶段注册监听器：
 
-- **Bubble phase** (default)
-- **Capture phase** (set `useCapture = true`)
+- **冒泡阶段**（默认）
+- **捕获阶段**（设置 `useCapture = true`）
 
-Use `addEventListener(eventType, listener)` to register a **bubble-phase** listener:
+使用 `addEventListener(eventType, listener)` 注册一个 **冒泡阶段** 监听器：
 
 === "Java"
 
@@ -91,7 +90,7 @@ Use `addEventListener(eventType, listener)` to register a **bubble-phase** liste
     });
     ```
 
-To register a capture-phase listener, pass true as the third argument:
+要注册捕获阶段监听器，将 true 作为第三个参数传递：
 
 === "Java"
 
@@ -110,7 +109,7 @@ To register a capture-phase listener, pass true as the third argument:
     }, true);
     ```
 
-We also provide method allow you to listen events on the `server`. Events are triggered on the client-side and sync to the server. Not all events support server listeners, check [Event reference](#event-reference) below.
+我们还提供了允许您在 `server` 上监听事件的方法。事件在客户端触发并同步到服务器。并非所有事件都支持服务器监听器，请查看下面的 [事件参考](#事件参考)。
 
 
 === "Java"
@@ -129,8 +128,8 @@ We also provide method allow you to listen events on the `server`. Events are tr
     });
     ```
 
-To remove a listener, call `removeEventListener(...)`.
-Make sure the useCapture flag matches how the listener was registered:
+要移除监听器，调用 `removeEventListener(...)`。
+确保 useCapture 标志与监听器注册时的方式匹配：
 
 === "Java"
 
@@ -140,8 +139,8 @@ Make sure the useCapture flag matches how the listener was registered:
     button.addEventListener(UIEvents.CLICK, onClick);       // bubble
     root.addEventListener(UIEvents.CLICK, onClick, true);   // capture
 
-    button.removeEventListener(UIEvents.CLICK, onClick);          // remove bubble listener
-    root.removeEventListener(UIEvents.CLICK, onClick, true);      // remove capture listener
+    button.removeEventListener(UIEvents.CLICK, onClick);          // 移除冒泡监听器
+    root.removeEventListener(UIEvents.CLICK, onClick, true);      // 移除捕获监听器
     ```
 
 === "KubeJS"
@@ -152,49 +151,48 @@ Make sure the useCapture flag matches how the listener was registered:
     button.addEventListener(UIEvents.CLICK, onClick);       // bubble
     root.addEventListener(UIEvents.CLICK, onClick, true);   // capture
 
-    button.removeEventListener(UIEvents.CLICK, onClick);          // remove bubble listener
-    root.removeEventListener(UIEvents.CLICK, onClick, true);      // remove capture listener
+    button.removeEventListener(UIEvents.CLICK, onClick);          // 移除冒泡监听器
+    root.removeEventListener(UIEvents.CLICK, onClick, true);      // 移除捕获监听器
     ```
 
 ---
 
-## Event reference
+## 事件参考
 
-LDLib2 raises an event when a user interacts with and changes the state of elements. The event design is similar to the Event interface for HTML elements.
+当用户与元素交互并改变其状态时，LDLib2 会引发事件。事件设计类似于 HTML 元素的事件接口。
 
-Event types fit into a hierarchy based on the `UIEvent.class`. Each event family implements an interface that defines the common characteristics of all events of the same family.
+事件类型基于 `UIEvent.class` 形成一个层次结构。每个事件族实现一个接口，该接口定义了同一族所有事件的共同特征。
 
-Here, we list common events available for all ui elemetns below. Select any of the event types listed below for more information on the event, and links to the API documentation.
+在这里，我们列出了所有 UI 元素可用的常见事件。选择下面列出的任何事件类型以获取有关该事件的更多信息以及 API 文档的链接。
 
 !!! note
-    We'd recommend to use `UIEvents.xxx` instead of an event type string.
+    我们建议使用 `UIEvents.xxx` 而不是事件类型字符串。
 
+### 鼠标事件
 
-### Mouse Events
+鼠标事件是最常用的事件。当处理器开始捕获鼠标后发送的事件。
 
-Mouse Events are most used events. Event sent after a handler starts capturing the mouse.
-
-| Event | Description | Capture down | Bubbles up | Support Server |
+| 事件 | 描述 | 捕获向下 | 冒泡向上 | 支持服务器 |
 | ----- | ----------- | ------------ | ---------- | ---------- |
-| `mouseDown` | Fired when the user presses a mouse button. | ✅ | ✅ | ✅ |
-| `mouseUp` | Fired when the user releases a mouse button. | ✅ | ✅ | ✅ |
-| `mouseClick` | Fired when the user clicks a mouse button (press + release). | ✅ | ✅ | ✅ |
-| `doubleClick` | Fired when the user double-clicks a mouse button. | ✅ | ✅ | ✅ |
-| `mouseMove` | Fired when the mouse moves over the element. | ✅ | ✅ | ✅ |
-| `mouseEnter` | Fired when the mouse enters an element or one of its descendants. | ✅ | ❌ | ✅ |
-| `mouseLeave` | Fired when the mouse leaves an element or one of its descendants. | ✅ | ❌ | ✅ |
-| `mouseWheel` | Fired when the user scrolls the mouse wheel. | ✅ | ✅ | ✅ |
+| `mouseDown` | 当用户按下鼠标按钮时触发。 | ✅ | ✅ | ✅ |
+| `mouseUp` | 当用户释放鼠标按钮时触发。 | ✅ | ✅ | ✅ |
+| `mouseClick` | 当用户点击鼠标按钮（按下 + 释放）时触发。 | ✅ | ✅ | ✅ |
+| `doubleClick` | 当用户双击鼠标按钮时触发。 | ✅ | ✅ | ✅ |
+| `mouseMove` | 当鼠标在元素上移动时触发。 | ✅ | ✅ | ✅ |
+| `mouseEnter` | 当鼠标进入元素或其子元素之一时触发。 | ✅ | ❌ | ✅ |
+| `mouseLeave` | 当鼠标离开元素或其子元素之一时触发。 | ✅ | ❌ | ✅ |
+| `mouseWheel` | 当用户滚动鼠标滚轮时触发。 | ✅ | ✅ | ✅ |
 
 
-| Field | Description | Supported Event |
+| 字段 | 描述 | 支持的事件 |
 | ----- | ----------- | --------------- |
-| `x` | mouse position x | All |
-| `y` | mouse position y | All |
-| `button` | mouse button code (0 - left, 1 - right, 2 - middle, others...) | `mouseDown` `mouseUp` `mouseClick` `doubleClick` |
-| `deltaX` | scroll delta x | `mouseWheel` |
-| `deltaY` | scroll delta y | `mouseWheel` |
+| `x` | 鼠标位置 x | 全部 |
+| `y` | 鼠标位置 y | 全部 |
+| `button` | 鼠标按钮代码 (0 - 左键, 1 - 右键, 2 - 中键, 其他...) | `mouseDown` `mouseUp` `mouseClick` `doubleClick` |
+| `deltaX` | 滚动增量 x | `mouseWheel` |
+| `deltaY` | 滚动增量 y | `mouseWheel` |
 
-**Usage**
+**用法**
 
 === "Java"
 
@@ -214,58 +212,57 @@ Mouse Events are most used events. Event sent after a handler starts capturing t
 
 ---
 
-### Drag and Drop Events
+### 拖放事件
 
-Drag and drop events are dispatched during drag operations.
-**These events are client-side only and will not be sent to the server.**
+拖放事件在拖拽操作期间派发。
+**这些事件仅在客户端生效，不会发送到服务器。**
 
-| Event              | Description  | Capture down | Bubbles up | Support Server |
+| 事件              | 描述  | 捕获向下 | 冒泡向上 | 支持服务器 |
 | ------------------ | ------------ | ------------ | ---------- | ---------- |
-| `dragEnter`        | Fired when the pointer enters an element during a drag operation. | ✅ | ❌ | ❌ |
-| `dragLeave`        | Fired when the pointer leaves an element during a drag operation. | ✅ | ❌ | ❌ |
-| `dragUpdate`       | Fired when the pointer moves over an element during dragging.     | ✅ | ✅ | ❌ |
-| `dragSourceUpdate` | Fired on the drag source while dragging.                          | ✅ | ❌ | ❌ |
-| `dragPerform`      | Fired when the dragged object is released over an element.        | ✅ | ❌ | ❌ |
-| `dragEnd`          | Fired on the drag source when the drag operation ends.            | ✅ | ❌ | ❌ |
+| `dragEnter`        | 当指针在拖拽操作期间进入元素时触发。 | ✅ | ❌ | ❌ |
+| `dragLeave`        | 当指针在拖拽操作期间离开元素时触发。 | ✅ | ❌ | ❌ |
+| `dragUpdate`       | 当指针在拖拽过程中在元素上移动时触发。     | ✅ | ✅ | ❌ |
+| `dragSourceUpdate` | 拖拽源在拖拽时触发。                          | ✅ | ❌ | ❌ |
+| `dragPerform`      | 当被拖拽对象在元素上释放时触发。        | ✅ | ❌ | ❌ |
+| `dragEnd`          | 拖拽操作结束时在拖拽源上触发。            | ✅ | ❌ | ❌ |
 
-| Field | Description | Supported Event |
+| 字段 | 描述 | 支持的事件 |
 | ----- | ----------- | --------------- |
-| `x` | mouse position x | All |
-| `y` | mouse position y | All |
-| `relatedTarget` | If the relatedTarget is not null, it means the new element entered. | `dragLeave` |
-| `deltaX` | dragging delta x | All |
-| `deltaY` | dragging delta y | All |
-| `dragStartX` | start position x before dragging | All |
-| `dragStartY` | start position y before dragging | All |
-| `dragHandler` | DragHandler is used to handle drag events. | All |
+| `x` | 鼠标位置 x | 全部 |
+| `y` | 鼠标位置 y | 全部 |
+| `relatedTarget` | 如果 relatedTarget 不为 null，表示有新的元素进入。 | `dragLeave` |
+| `deltaX` | 拖拽增量 x | 全部 |
+| `deltaY` | 拖拽增量 y | 全部 |
+| `dragStartX` | 拖拽前的起始位置 x | 全部 |
+| `dragStartY` | 拖拽前的起始位置 y | 全部 |
+| `dragHandler` | DragHandler 用于处理拖拽事件。 | 全部 |
 
+所有拖放事件只有在调用 `startDrag` 开始拖拽后才会被触发。拖放生命周期如下：
 
-All drag events will only be triggered after the drag is started `startDrag`. The drag and drop lifecycle is as follows:
+1. 要触发拖拽，例如，在鼠标事件中，可以调用 `startDrag`。
+2. 使用拖拽事件做些什么，`dragEnter`、`dragLeave`、`dragUpdate` 和 `dragSourceUpdate`（如果定义了拖拽源）。
+3. 当拖拽完成时，触发 `dragPerform` 和 `dragEnd`（如果定义了拖拽源）。
 
-1. To trigger dragging, for example, in mouse events, you can call `startDrag`.
-2. do something with drag events, `dragEnter`, `dragLeave`, `dragUpdate`, and `dragSourceUpdate` (if th drag source is defined).
-3. When the drag is finished, trigger `dragPerform`, and `dragEnd` (if th drag source is defined)
+**方法：`#!java DragHandler.startDrag(Object draggingObject, IGuiTexture dragTexture, UIElement dragSource)`**
 
-**Method: `#!java DragHandler.startDrag(Object draggingObject, IGuiTexture dragTexture, UIElement dragSource)`**
+参数：
 
-Parameters:
-
-- `draggingObject`: the object being dragged; can be of any type to represent the drag payload
-- `dragTexture`: used to visually represent the drag operation
-- `dragSource`: the `UIElement` that acts as the source of the drag operation
+- `draggingObject`：正在拖拽的对象；可以是任何类型以表示拖拽负载
+- `dragTexture`：用于视觉上表示拖拽操作的纹理
+- `dragSource`：作为拖拽操作源的 `UIElement`
 
 !!! note
-    `dragSourceUpdate` and `dragEnd` are only dispatched to the drag source.
+    `dragSourceUpdate` 和 `dragEnd` 仅派发给拖拽源。
 
-You could also start a drag by using `UIElement.startDrag` which can help you pass the `dragSource` directly.
+你也可以使用 `UIElement.startDrag` 来开始拖拽，它可以帮助你直接传递 `dragSource`。
 
-**Usage**
+**用法**
 
 === "Java"
 
     ```java
     elem.addEventListener(UIEvents.MOUSE_DOWN, e -> {
-        // start drag when the mouse down
+        // 鼠标按下时开始拖拽
         elem.startDrag(null, null);
     });
     elem.addEventListener(UIEvents.DRAG_SOURCE_UPDATE, e -> {
@@ -277,7 +274,7 @@ You could also start a drag by using `UIElement.startDrag` which can help you pa
 
     ```js
     elem.addEventListener(UIEvents.MOUSE_DOWN, e => {
-        // start drag when the mouse down
+        // 鼠标按下时开始拖拽
         elem.startDrag(null, null);
     });
     elem.addEventListener(UIEvents.DRAG_SOURCE_UPDATE, e => {
@@ -287,33 +284,33 @@ You could also start a drag by using `UIElement.startDrag` which can help you pa
 
 ---
 
-### Focus Events
+### 焦点事件
 
-Focus events are dispatched when `focusable` elements gain or lose focus.
+当 `可聚焦` 元素获得或失去焦点时，会派发焦点事件。
 
-| Event      | Description                                   | Capture down | Bubbles up | Support Server |
+| 事件      | 描述                                   | 捕获向下 | 冒泡向上 | 支持服务器 |
 | ---------- | --------------------------------------------- | ------------ | ---------- | ---------- |
-| `focusIn`  | Fired when an element is about to gain focus. | ✅ | ❌ | ❌ |
-| `focus`    | Fired after an element has gained focus.      | ✅ | ❌ | ✅ |
-| `focusOut` | Fired when an element is about to lose focus. | ✅ | ❌ | ❌ |
-| `blur`     | Fired after an element has lost focus.        | ✅ | ❌ | ✅ |
+| `focusIn`  | 当元素即将获得焦点时触发。 | ✅ | ❌ | ❌ |
+| `focus`    | 当元素获得焦点后触发。      | ✅ | ❌ | ✅ |
+| `focusOut` | 当元素即将失去焦点时触发。 | ✅ | ❌ | ❌ |
+| `blur`     | 当元素失去焦点后触发。        | ✅ | ❌ | ✅ |
 
-| Field | Description | Supported Event |
+| 字段 | 描述 | 支持的事件 |
 | ----- | ----------- | --------------- |
-| `relatedTarget` | For `focusIn` and `focus`, refers to last focused element. <br> For `focusOut` and `blur`, refers to last focused element. | All |
+| `relatedTarget` | 对于 `focusIn` 和 `focus`，指上一个获得焦点的元素。 <br> 对于 `focusOut` 和 `blur`，指上一个失去焦点的元素。 | 全部 |
 
 !!! note
-    - `focusIn` and `focusOut` are **not sent to the server**.
-    - `relatedTarget` indicates the element losing or gaining focus.
+    - `focusIn` 和 `focusOut` **不会发送到服务器**。
+    - `relatedTarget` 表示正在失去或获得焦点的元素。
 
-**Usage**
+**用法**
 
 === "Java"
 
     ```java
     elem.setFocusable(true)
     elem.addEventListener(UIEvents.MOUSE_DOWN, e -> {
-        // request focus
+        // 请求焦点
         elem.focus();
     });
     elem.addEventListener(UIEvents.FOCUS, e -> {
@@ -326,7 +323,7 @@ Focus events are dispatched when `focusable` elements gain or lose focus.
     ```js
     elem.setFocusable(true)
     elem.addEventListener(UIEvents.MOUSE_DOWN, e => {
-        // request focus
+        // 请求焦点
         elem.focus();
     });
     elem.addEventListener(UIEvents.FOCUS, e => {
@@ -336,30 +333,30 @@ Focus events are dispatched when `focusable` elements gain or lose focus.
 
 ---
 
-### Keyboard Events
+### 键盘事件
 
-Keyboard events are dispatched to the element that currently has **focus**.
+键盘事件派发给当前拥有 **焦点** 的元素。
 
-| Event     | Description                                         | Capture down | Bubbles up | Support Server |
+| 事件     | 描述                                         | 捕获向下 | 冒泡向上 | 支持服务器 |
 | --------- | --------------------------------------------------- | ------------ | ---------- | ---------- |
-| `keyDown` | Fired when the user presses a key on the keyboard.  | ✅ | ✅ | ✅ |
-| `keyUp`   | Fired when the user releases a key on the keyboard. | ✅ | ✅ | ✅ |
+| `keyDown` | 当用户在键盘上按下按键时触发。  | ✅ | ✅ | ✅ |
+| `keyUp`   | 当用户在键盘上释放按键时触发。 | ✅ | ✅ | ✅ |
 
 
-| Field | Description | Supported Event |
+| 字段 | 描述 | 支持的事件 |
 | ----- | ----------- | --------------- |
-| `keyCode` | key code | All |
-| `scanCode` | sccan code | All |
-| `modifiers` | modifiers | All |
+| `keyCode` | 按键代码 | 全部 |
+| `scanCode` | 扫描代码 | 全部 |
+| `modifiers` | 修饰键 | 全部 |
 
-**Usage**
+**用法**
 
 === "Java"
 
     ```java
     elem.setFocusable(true)
     elem.addEventListener(UIEvents.MOUSE_DOWN, e -> {
-        // request focus
+        // 请求焦点
         elem.focus();
     });
     elem.addEventListener(UIEvents.KEY_DOWN, e -> {
@@ -372,7 +369,7 @@ Keyboard events are dispatched to the element that currently has **focus**.
     ```js
     elem.setFocusable(true)
     elem.addEventListener(UIEvents.MOUSE_DOWN, e => {
-        // request focus
+        // 请求焦点
         elem.focus();
     });
     elem.addEventListener(UIEvents.KEY_DOWN, e => {
@@ -382,27 +379,27 @@ Keyboard events are dispatched to the element that currently has **focus**.
 
 ---
 
-### Text Input Events
+### 文本输入事件
 
-Text input events are used for character-level input, such as typing into text fields, which also dispatched to the element that currently has **focus**.
+文本输入事件用于字符级输入，例如在文本字段中键入，同样派发给当前拥有 **焦点** 的元素。
 
-| Event       | Description                                      | Capture down | Bubbles up | Support Server |
+| 事件       | 描述                                      | 捕获向下 | 冒泡向上 | 支持服务器 |
 | ----------- | ------------------------------------------------ | ------------ | ---------- | ---------- |
-| `charTyped` | Fired when a character is input into an element. | ❌ | ❌ | ✅ |
+| `charTyped` | 当向元素输入字符时触发。 | ❌ | ❌ | ✅ |
 
-| Field | Description | Supported Event |
+| 字段 | 描述 | 支持的事件 |
 | ----- | ----------- | --------------- |
-| `codePoint` | code point | All |
-| `modifiers` | modifiers | All |
+| `codePoint` | 代码点 | 全部 |
+| `modifiers` | 修饰键 | 全部 |
 
-**Usage**
+**用法**
 
 === "Java"
 
     ```java
     elem.setFocusable(true)
     elem.addEventListener(UIEvents.MOUSE_DOWN, e -> {
-        // request focus
+        // 请求焦点
         elem.focus();
     });
     elem.addEventListener(UIEvents.CHAR_TYPED, e -> {
@@ -415,7 +412,7 @@ Text input events are used for character-level input, such as typing into text f
     ```js
     elem.setFocusable(true)
     elem.addEventListener(UIEvents.MOUSE_DOWN, e => {
-        // request focus
+        // 请求焦点
         elem.focus();
     });
     elem.addEventListener(UIEvents.CHAR_TYPED, e => {
@@ -424,34 +421,33 @@ Text input events are used for character-level input, such as typing into text f
     ```
 ---
 
-### Hover Tooltip Events
+### 悬停提示事件
 
-Hover tooltip events are dispatched when dynamic tooltip information needs to be shown.
+当需要显示动态提示信息时，会派发悬停提示事件。
 
-
-| Event           | Description                                  | Capture down | Bubbles up | Support Server |
+| 事件           | 描述                                  | 捕获向下 | 冒泡向上 | 支持服务器 |
 | --------------- | -------------------------------------------- | ------------ | ---------- | ---------- |
-| `hoverTooltips` | Fired to provide hover tooltip content for an element. | ❌ | ❌ | ❌ |
+| `hoverTooltips` | 触发以为元素提供悬停提示内容。 | ❌ | ❌ | ❌ |
 
-| Field | Description | Supported Event |
+| 字段 | 描述 | 支持的事件 |
 | ----- | ----------- | --------------- |
-| `hoverTooltips` | Set your hover tooltips to display | All |
+| `hoverTooltips` | 设置您要显示的悬停提示 | 全部 |
 
 !!! info "TooltipComponent"
     ![size](../assets/tooltipcomponent.png){ align=right width="200" }
-    `hoverTooltips` allow you to append a `TooltipComponent` after text components. You could append a LDLib2 UI into the tooltip by using `ModularUITooltipComponent`.
+    `hoverTooltips` 允许您在文本组件后追加 `TooltipComponent`。您可以使用 `ModularUITooltipComponent` 将 LDLib2 UI 附加到提示中。
     
 
-**Usage**
+**用法**
 
 === "Java"
 
     ```java
     elem.addEventListener(UIEvents.HOVER_TOOLTIPS, e -> {
         e.hoverTooltips = HoverTooltips.empty()
-            // add text tooltips
+            // 添加文本提示
             .append(Component.literal("Hello"), Component.literal("World"))
-            // add a image
+            // 添加图片
             .tooltipComponent(new ModularUITooltipComponent(new UIElement().layout(layout -> {
                 layout.width(100).height(100);
             }).style(style -> style.background(SpriteTexture.of("ldlib2:textures/gui/icon.png")))));
@@ -463,9 +459,9 @@ Hover tooltip events are dispatched when dynamic tooltip information needs to be
     ```js
     elem.addEventListener(UIEvents.HOVER_TOOLTIPS, e => {
         e.hoverTooltips = HoverTooltips.empty()
-            // add text tooltips
+            // 添加文本提示
             .append("Hello", "World");
-            // add a image
+            // 添加图片
             .tooltipComponent(new ModularUITooltipComponent(new UIElement().layout(layout => {
                 layout.width(100).height(100);
             }).style(style => style.background(SpriteTexture.of("ldlib2:textures/gui/icon.png")))));
@@ -473,26 +469,26 @@ Hover tooltip events are dispatched when dynamic tooltip information needs to be
     ```
 ---
 
-### Command Events
+### 命令事件
 
-Command events are used to handle high-level UI commands (e.g. copy, paste, select all).
-They follow a validation → execution flow. To claim a command during `validateCommand`, call `UIEvent.stopPropagation()`.
+命令事件用于处理高级 UI 命令（例如复制、粘贴、全选）。
+它们遵循验证 → 执行的流程。要在 `validateCommand` 期间声明命令，请调用 `UIEvent.stopPropagation()`。
 
-| Event             | Description                     | Capture down | Bubbles up | Support Server |
+| 事件             | 描述                     | 捕获向下 | 冒泡向上 | 支持服务器 |
 | ----------------- | ------------------------------- | ------------ | ---------- | ---------- |
-| `validateCommand` | Fired to check whether an element can handle a command. | ❌ | ❌ | ❌ |
-| `executeCommand`  | Fired when a command is executed on an element.         | ❌ | ❌ | ❌ |
+| `validateCommand` | 触发以检查元素是否可以处理某个命令。 | ❌ | ❌ | ❌ |
+| `executeCommand`  | 当命令在元素上执行时触发。         | ❌ | ❌ | ❌ |
 
-| Field | Description | Supported Event |
+| 字段 | 描述 | 支持的事件 |
 | ----- | ----------- | --------------- |
-| `keyCode` | key code | All |
-| `scanCode` | sccan code | All |
-| `modifiers` | modifiers | All |
-| `command` | command | All |
+| `keyCode` | 按键代码 | 全部 |
+| `scanCode` | 扫描代码 | 全部 |
+| `modifiers` | 修饰键 | 全部 |
+| `command` | 命令 | 全部 |
 
-**Commands**
+**命令**
 
-| Command | Description |
+| 命令 | 描述 |
 | ----- | ----------- |
 | `copy` | ctrl + c |
 | `cut` | ctrl + x |
@@ -505,16 +501,16 @@ They follow a validation → execution flow. To claim a command during `validate
 
 
 !!! note
-    If a command input is detected. A command event will be sent to the `focus` element first (if exists). If it doesn't be consumed, it will be sent to the UI tree elements until an element cconsumes it.
+    如果检测到命令输入。命令事件将首先发送给 `focus` 元素（如果存在）。如果它没有被消费，它将被发送给 UI 树元素，直到某个元素消费它为止。
 
-**Usage**
+**用法**
 
 === "Java"
 
     ```java
     elem.addEventListener(UIEvents.VALIDATE_COMMAND, e -> {
         if (CommandEvents.COPY.equals(event.command)) {
-            // notify cosnuming
+            // 通知消费
             event.stopPropagation();
         }
     });
@@ -531,7 +527,7 @@ They follow a validation → execution flow. To claim a command during `validate
     ```js
     elem.addEventListener(UIEvents.VALIDATE_COMMAND, e => {
         if (CommandEvents.COPY == event.command) {
-            // notify cosnuming
+            // 通知消费
             event.stopPropagation();
         }
     });
@@ -545,16 +541,16 @@ They follow a validation → execution flow. To claim a command during `validate
 
 ---
 
-### Layout Events
+### 布局事件
 
-Layout events are dispatched when the layout state of an element changes.
+当元素的布局状态发生变化时，会派发布局事件。
 
-| Event           | Description                                  | Capture down | Bubbles up | Support Server |
+| 事件           | 描述                                  | 捕获向下 | 冒泡向上 | 支持服务器 |
 | --------------- | -------------------------------------------- | ------------ | ---------- | ---------- |
-| `layoutChanged` | Fired when the yoga layout of an element changes. | ❌ | ❌ | ❌ |
+| `layoutChanged` | 当元素的 yoga 布局发生变化时触发。 | ❌ | ❌ | ❌ |
 
 
-**Usage**
+**用法**
 
 === "Java"
 
@@ -574,26 +570,26 @@ Layout events are dispatched when the layout state of an element changes.
 
 ---
 
-### Lifecycle Events
+### 生命周期事件
 
-Lifecycle events describe changes to an element’s presence in the UI tree.
+生命周期事件描述了元素在 UI 树中存在状态的变化。
 
-| Event        | Description                                       | Capture down | Bubbles up | Support Server |
+| 事件        | 描述                                       | 捕获向下 | 冒泡向上 | 支持服务器 |
 | ------------ | ------------------------------------------------- | ------------ | ---------- | ---------- |
-| `added`      | Fired when the element is added to the UI tree.        | ❌            | ❌          | ❌ |
-| `removed`    | Fired when the element is removed from the UI tree.    | ❌            | ❌          | ❌ |
-| `muiChanged` | Fired when the element’s `ModularUI` instance changes. | ❌            | ❌          | ❌ |
+| `added`      | 当元素被添加到 UI 树时触发。        | ❌            | ❌          | ❌ |
+| `removed`    | 当元素从 UI 树中移除时触发。    | ❌            | ❌          | ❌ |
+| `muiChanged` | 当元素的 `ModularUI` 实例更改时触发。 | ❌            | ❌          | ❌ |
 
 !!! note
-    `removed` will be sent not only the element removing but also UI closing. You could use this event to disponse resource.
+    `removed` 不仅在元素移除时发送，UI 关闭时也会发送。你可以使用此事件来释放资源。
 
-**Usage**
+**用法**
 
 === "Java"
 
     ```java
     elem.addEventListener(UIEvents.REMOVED, e -> {
-        // release resource here for safe
+        // 为安全起见在此释放资源
     });
     ```
 
@@ -601,24 +597,23 @@ Lifecycle events describe changes to an element’s presence in the UI tree.
 
     ```js
     elem.addEventListener(UIEvents.REMOVED, e => {
-        // release resource here for safe
+        // 为安全起见在此释放资源
     });
     ```
 
 ---
 
-### Tick Event
+### 刻事件
 
-The tick event is dispatched once per game tick while the element is active and visible.
+刻事件在元素处于活动且可见状态时，每游戏刻派发一次。
 
-| Event  | Description                                           | Capture down | Bubbles up | Support Server |
+| 事件  | 描述                                           | 捕获向下 | 冒泡向上 | 支持服务器 |
 | ------ | ----------------------------------------------------- | ------------ | ---------- | ---------- |
-| `tick` | Fired every tick when the element is active and displayed. | ❌ | ❌ | ✅ |
+| `tick` | 当元素处于活动并显示状态时，每刻触发一次。 | ❌ | ❌ | ✅ |
 
 !!! note
-    - `tick` is not sent to the server automatically.
-    - You may still listen to it on the server side if needed.
-
+    - `tick` 不会自动发送到服务器。
+    - 如果需要，您仍然可以在服务器端监听它。
 
 === "Java"
 

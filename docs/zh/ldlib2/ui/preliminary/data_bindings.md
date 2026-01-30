@@ -1,43 +1,38 @@
-# Data Bindings and RPCEvent
+# 数据绑定与RPCEvent
 
 {{ version_badge("2.1.5", label="Since", icon="tag") }}
 
-Before learning **Data Bindings** and **RPCEvent**, it is important to understand  
-the relationship between **UI components** and **data**.
+在学习**数据绑定**和**RPCEvent**之前，了解**UI组件**与**数据**之间的关系非常重要。
 
 ---
 
-## Data bindings on the client side
+## 客户端的数据绑定
 
-If a UI component is data-driven, its role in the data model usually falls into one of the following categories:
+如果UI组件是数据驱动的，它在数据模型中的角色通常属于以下类别之一：
 
-- **Data consumer**: passively receives data and renders it.
-- **Data producer**: produces data that may change (pure producers are rare in practice).
-- **Data consumer + producer**: both displays data and modifies it.
+*   **数据消费者**：被动接收数据并渲染它。
+*   **数据生产者**：产生可能变化的数据（实践中纯生产者很少见）。
+*   **数据消费者 + 生产者**：既显示数据，也修改数据。
 
+### **数据消费者**与 `IDataConsumer<T>`
 
-### **Data consumer** with `IDataConsumer<T>`
+**被动接收数据**的组件实现了 `IDataConsumer<T>` 接口，例如 `Label` 和 `ProgressBar`。
 
-Components that **passively receive data** implement the `IDataConsumer<T>` interface,  
-such as `Label` and `ProgressBar`.
+此接口允许您绑定一个 `IDataProvider<T>`，它负责**提供更新后的数据值**。
 
-This interface allows you to bind an `IDataProvider<T>`,  
-which is responsible for **supplying updated data values**.
-
-This is useful when you want to display **dynamic text** or **changing progress values**.
-
+当您想要显示**动态文本**或**变化的进度值**时，这很有用。
 
 === "Java"
 
     ```java
     var valueHolder = new AtomicInteger(0);
-    // bind a DataSource to notify the value changes for label and progress bar
+    // 绑定一个 DataSource 来通知标签和进度条的值变化
     new Label().bindDataSource(SupplierDataSource.of(() -> 
-        Component.literal("Binding: ").append(String.valueOf(valueHolder.get())))),
+        Component.literal("绑定值: ").append(String.valueOf(valueHolder.get())))),
     new ProgressBar()
             .bindDataSource(SupplierDataSource.of(() -> valueHolder.get() / 100f))
             .label(label -> label.bindDataSource(SupplierDataSource.of(() -> 
-                Component.literal("Progress: ").append(String.valueOf(valueHolder.get())))))
+                Component.literal("进度: ").append(String.valueOf(valueHolder.get())))))
     ```
 
 === "KubeJS"
@@ -46,33 +41,32 @@ This is useful when you want to display **dynamic text** or **changing progress 
     let valueHolder = {
         "value": 0
     }
-    // bind a DataSource to notify the value changes for label and progress bar
-    new Label().bindDataSource(SupplierDataSource.of(() => `Binding: ${valueHolder.value}`)),
+    // 绑定一个 DataSource 来通知标签和进度条的值变化
+    new Label().bindDataSource(SupplierDataSource.of(() => `绑定值: ${valueHolder.value}`)),
     new ProgressBar()
         .bindDataSource(SupplierDataSource.of(() => valueHolder.value / 100))
-        .label(label => label.bindDataSource(SupplierDataSource.of(() => `Progress: ${valueHolder.value}`)))
+        .label(label => label.bindDataSource(SupplierDataSource.of(() => `进度: ${valueHolder.value}`)))
     ```
 
-### **Data producer** with `IObservable<T>`
-Components that produce changeable data implement the `IObservable<T>` interface.
-Most data-driven components fall into this category, such as `Toggle`, `TextField`, `Selector`
+### **数据生产者**与 `IObservable<T>`
+产生可变数据的组件实现了 `IObservable<T>` 接口。
+大多数数据驱动的组件都属于此类，例如 `Toggle`、`TextField`、`Selector`。
 
-This interface allows you to bind an `IObserver<T>`,
-which is notified whenever the component’s value changes.
+此接口允许您绑定一个 `IObserver<T>`，每当组件的值发生变化时，它都会收到通知。
 
-For example, to observe changes from a `TextField`:
+例如，要观察 `TextField` 的变化：
 
 === "Java"
 
     ```java
     var valueHolder = new AtomicInteger(0);
-    // bind a Observer to observe the value changes of the text-field
+    // 绑定一个 Observer 来观察文本框的值变化
     new TextField()
         .setNumbersOnlyInt(0, 100)
         .setValue(String.valueOf(valueHolder.get()))
-        // bind an Observer to update the value holder
+        // 绑定一个 Observer 来更新值持有器
         .bindObserver(value -> valueHolder.set(Integer.parseInt(value)))
-        // actually, equal to setTextResponder
+        // 实际上，等同于 setTextResponder
         //.setTextResponder(value -> valueHolder.set(Integer.parseInt(value)))
     ```
 
@@ -82,70 +76,65 @@ For example, to observe changes from a `TextField`:
     let valueHolder = {
         "value": 0
     }
-    // bind a Observer to observe the value changes of the text-field
+    // 绑定一个 Observer 来观察文本框的值变化
     new TextField()
         .setNumbersOnlyInt(0, 100)
         .setValue(valueHolder.value)
-        // bind an Observer to update the value holder
+        // 绑定一个 Observer 来更新值持有器
         .bindObserver(value => valueHolder.value = int(value))
-        // actually, equal to setTextResponder
+        // 实际上，等同于 setTextResponder
         //.setTextResponder(value => valueHolder.value = int(value))
     ```
 
 !!! note
-    Components such as `Toggle`, `Selector`, and `TextField` support both
-    `IDataConsumer<T>` and `IObservable<T>`,
-    because they are responsible for displaying data and modifying it at the same time.
+    像 `Toggle`、`Selector` 和 `TextField` 这样的组件同时支持 `IDataConsumer<T>` 和 `IObservable<T>`，因为它们负责同时显示数据和修改数据。
 
 ---
 
-## Data Bindings Between Client and Server
+## 客户端与服务器之间的数据绑定
 
-If your UI works **only on the client**, `IDataConsumer<T>` and `IObservable<T>` are usually sufficient.  
-They cover most needs for observing and updating local data.
+如果您的UI**仅在客户端运行**，`IDataConsumer<T>` 和 `IObservable<T>` 通常就足够了。它们覆盖了观察和更新本地数据的大部分需求。
 
-However, many UIs are **container-based UIs**, where the actual data is stored on the **server**.  
-In this case, you typically want:
+但是，许多UI是**基于容器的UI**，实际数据存储在**服务器**上。在这种情况下，您通常希望：
 
-- To **display server-side data** in client UI components.
-- To **sync changes made on the client UI back to the server**.
+*   在客户端UI组件中**显示服务器端数据**。
+*   将**客户端UI上所做的更改同步回服务器**。
 
-This is known as **bidirectional data binding**
+这被称为**双向数据绑定**。
 
 ```mermaid
 sequenceDiagram
   autonumber
-  Server->>Client UI: Sync initial data (if s->c allowed)
-  Note right of Client UI: Initialize UI state
-  Server->>Server: Detect server-side data change
-  Server->>Client UI: Sync updated data (if s->c allowed)
-  Note right of Client UI: Update UI display
+  Server->>Client UI: 同步初始数据（如果允许s->c）
+  Note right of Client UI: 初始化UI状态
+  Server->>Server: 检测服务器端数据变化
+  Server->>Client UI: 同步更新后的数据（如果允许s->c）
+  Note right of Client UI: 更新UI显示
 
-  Client UI->>Client UI: UI interaction changes value
-  Client UI->>Server: Sync changed data (if c->s allowed)
-  Note left of Server: Apply server-side update
+  Client UI->>Client UI: UI交互改变值
+  Client UI->>Server: 同步更改的数据（如果允许c->s）
+  Note left of Server: 应用服务器端更新
 
 ```
 
-This may sound complex, but LDLib2 fully abstracts this process. 
+这听起来可能很复杂，但LDLib2完全抽象了这个过程。
 
 ---
 
-### Using `DataBindingBuilder<T>`
+### 使用 `DataBindingBuilder<T>`
 
-With `DataBindingBuilder<T>`, you **do not need to write any synchronization logic yourself**.
-You only describe:
+使用 `DataBindingBuilder<T>`，您**无需自己编写任何同步逻辑**。您只需要描述：
 
-* **Where the data is stored**
-* **How to read it**
-* **How to apply updates**
+*   **数据存储在哪里**
+*   **如何读取它**
+*   **如何应用更新**
 
-#### Simple Bidirectional Binding
+#### 简单的双向绑定
 
 === "Java"
 
     ```java
-    // Server-side values
+    // 服务器端值
     // boolean bool = true;
     // String string = "hello";
     // ItemStack item = new ItemStack(Items.APPLE);
@@ -163,7 +152,7 @@ You only describe:
 === "KubeJS"
 
     ```js
-    // Server-side values
+    // 服务器端值
     // let bool = true;
     // let string = "hello";
     // let item = new ItemStack(Items.APPLE);
@@ -178,43 +167,42 @@ You only describe:
         .bind(DataBindingBuilder.itemStack(() => item, v => item = v).build());
     ```
 
-For example, in:
+例如，在：
 
 ```java
 DataBindingBuilder.bool(() -> bool, value -> bool = value).build()
 ```
 
-* The **first lambda** defines how the server provides data to the client.
-* The **second lambda** defines how client changes update server data.
+*   第一个lambda定义服务器如何向客户端提供数据。
+*   第二个lambda定义客户端更改如何更新服务器数据。
 
 ---
 
-### One-Way Binding (Server → Client Only)
+### 单向绑定（仅服务器→客户端）
 
-Sometimes, you **do not want client-side changes to affect the server**,
-such as with `Label`, which is display-only.
+有时，您**不希望客户端的更改影响服务器**，例如仅用于显示的 `Label`。
 
-LDLib2 allows you to explicitly control sync strategies.
+LDLib2 允许您明确控制同步策略。
 
-??? info "SyncStrategy Overview"
+??? info "SyncStrategy 概览"
     - `NONE`
-    No synchronization at all.
+    完全不进行同步。
     - `CHANGED_PERIODIC`
-    Sync only when data changes (default: once per tick).
+    仅当数据变化时同步（默认：每tick一次）。
     - `ALWAYS`
-    Force sync every tick, even if unchanged (use with caution).
+    强制每tick同步，即使未更改（谨慎使用）。
 
 === "Java"
 
     ```java
-    // Block client -> server updates
+    // 阻止客户端 -> 服务器的更新
     new Label().bind(
         DataBindingBuilder.component(() -> Component.literal(data), c -> {})
             .c2sStrategy(SyncStrategy.NONE)
             .build()
     );
 
-    // Shorthand for server -> client only
+    // 仅服务器 -> 客户端的简写形式
     new Label().bind(
         DataBindingBuilder.componentS2C(() -> Component.literal(data)).build()
     );
@@ -223,14 +211,14 @@ LDLib2 allows you to explicitly control sync strategies.
 === "KubeJS"
 
     ```js
-    // Block client -> server updates
+    // 阻止客户端 -> 服务器的更新
     new Label().bind(
         DataBindingBuilder.component(() => data, c => {})
             .c2sStrategy("NONE")
             .build()
     );
 
-    // Shorthand for server -> client only
+    // 仅服务器 -> 客户端的简写形式
     new Label().bind(
         DataBindingBuilder.componentS2C(() => data).build()
     );
@@ -238,13 +226,13 @@ LDLib2 allows you to explicitly control sync strategies.
 
 ---
 
-### Custom `IBinding<T>`
+### 自定义 `IBinding<T>`
 
-`DataBindingBuilder<T>` provides built-in bindings for common data types.
-For custom types (for example, `int[]`), you can create your own binding.
+`DataBindingBuilder<T>` 为常见数据类型提供了内置绑定。
+对于自定义类型（例如 `int[]`），您可以创建自己的绑定。
 
 ```java
-// Server-side value
+// 服务器端值
 // int[] data = new int[]{1, 2, 3};
 
 new BindableValue<int[]>().bind(
@@ -256,26 +244,26 @@ new BindableValue<int[]>().bind(
 ```
 
 !!! warning inline end
-    Not all types are supported by default.
-    See [Type Support](../../sync/types_support.md){ data-preview }.
-    Unsupported types require a custom type accessor.
+    默认并非所有类型都受支持。
+    参见[类型支持](../../sync/types_support.md){ data-preview }。
+    不支持的类型需要自定义类型访问器。
 
-If a type is **read-only** (see [Type Support](../../sync/types_support.md){ data-preview }):
+如果某个类型是**只读的**（参见[类型支持](../../sync/types_support.md){ data-preview }）：
 
-* The getter **must return a stable, non-null instance**.
-* You have to define the type and initial value.
+*   getter**必须返回一个稳定的、非空的实例**。
+*   您必须定义类型和初始值。
 
-Example with `INBTSerializable`:
+使用 `INBTSerializable` 的示例：
 
 ```java
-// Server-side value
+// 服务器端值
 // INBTSerializable<CompoundTag> data = ...;
 
 new BindableValue<INBTSerializable>().bind(
     DataBindingBuilder.create(
         () -> data,
         v -> {
-            // Instance already updated, just react here
+            // 实例已更新，只需在此做出反应
         }
     )
     .initialValue(data).syncType(INBTSerializable.class)
@@ -283,22 +271,22 @@ new BindableValue<INBTSerializable>().bind(
 );
 ```
 
-This ensures correct synchronization and avoids ambiguity for read-only objects.
+这确保了正确的同步，并避免了只读对象的歧义。
 
-### `Getter` and `Setter` on the client
-You may be wondering why we only define getter and setter logic on the server side, but not on the client side.
+### 客户端的 `Getter` 和 `Setter`
+您可能想知道，为什么我们只在服务器端定义 getter 和 setter 逻辑，而不在客户端定义。
 
-This is because all components that support the bind method inherit from `IBindable<T>`.
-For these components, LDLib2 automatically sets up the corresponding client-side getter and setter logic for data synchronization.
+这是因为所有支持 bind 方法的组件都继承自 `IBindable<T>`。
+对于这些组件，LDLib2 会自动为数据同步设置相应的客户端 getter 和 setter 逻辑。
 
-In most cases, this default behavior is sufficient and requires no additional configuration.
+在大多数情况下，这种默认行为就足够了，无需额外配置。
 
-However, if you want full control over how the client processes incoming data, or what data it sends back to the server, you can manually define your own client-side getter and setter logic.
+但是，如果您想完全控制客户端如何处理传入的数据，或它发送回服务器的数据，您可以手动定义自己的客户端 getter 和 setter 逻辑。
 
 === "Java"
 
     ```java
-    // Server-side value
+    // 服务器端值
     // Block data = ...;
 
     var label = new Label();
@@ -310,7 +298,7 @@ However, if you want full control over how the client processes incoming data, o
 === "KubeJS"
 
     ```js
-    // Server-side value
+    // 服务器端值
     // Block data = ...;
 
     let label = new Label();
@@ -320,22 +308,22 @@ However, if you want full control over how the client processes incoming data, o
     );
     ```
 
-### All in one - `BindableUIElement<T>`
-You may have already noticed that almost all data-driven components—such as `TextArea`, `SearchComponent`, `Switch`, and others—are built on top of `BindableUIElement<T>`.
-`BindableUIElement<T>` is a wrapped UI element that implements all of the following interfaces:
-This means it can both **display data** and **produce data changes**, while supporting **client–server synchronization**.
+### 一体化 - `BindableUIElement<T>`
+您可能已经注意到，几乎所有数据驱动的组件——如 `TextArea`、`SearchComponent`、`Switch` 等——都是构建在 `BindableUIElement<T>` 之上的。
+`BindableUIElement<T>` 是一个包装的 UI 元素，它实现了以下所有接口：
+这意味着它既可以**显示数据**，又可以**产生数据变化**，同时支持**客户端-服务器同步**。
 
 ??? info inline end
-    `BindableValue<T>` is actually a utill component, and set `dispaly: CONTENTS;`, which means it wont affect layout during it';s lifestyle.
+    `BindableValue<T>` 实际上是一个实用组件，并且设置了 `display: CONTENTS;`，这意味着它在生命周期内不会影响布局。
 
-If you want to implement your own UI component and support bidirectional data binding between the client and server, you can simply extend this class.
-For components that do **not** implement `IBindable<T>`—such as the base `UIElement`—you can still achieve data bindings by attaching a `BindableValue<T>` internally.
-The example below shows how to sync server-side data to the client and use it to control an element’s width:
+如果您想实现自己的 UI 组件并支持客户端和服务器之间的双向数据绑定，您可以简单地扩展这个类。
+对于**不**实现 `IBindable<T>` 的组件——比如基础的 `UIElement`——您仍然可以通过在内部附加一个 `BindableValue<T>` 来实现数据绑定。
+下面的示例展示了如何将服务器端数据同步到客户端，并用它来控制元素的宽度：
 
 === "Java"
 
     ```java
-    // Server-side value
+    // 服务器端值
     // var widthOnTheServer = 100f;
 
     var element = new UIElement();
@@ -348,7 +336,7 @@ The example below shows how to sync server-side data to the client and use it to
 === "KubeJS"
 
     ```js
-    // Server-side value
+    // 服务器端值
     // let widthOnTheServer = 100;
 
     let element = new UIElement();
@@ -359,20 +347,20 @@ The example below shows how to sync server-side data to the client and use it to
     );
     ```
 
-### Complex usage examples
+### 复杂用法示例
 
-Ok, let's do one more complicated exmaple, let's bind a list of `String` stored at the server for a `Selector` (as candidates ).
+好了，让我们再做一个更复杂的例子，为 `Selector` 绑定一个存储在服务器端的 `String` 列表（作为候选项）。
 ```java
-// method 1, we sync String[]
-// represent value stored on the server
+// 方法1，我们同步 String[]
+// 代表存储在服务器端的值
 // var candidates = new ArrayList<>(List.of("a", "b", "c", "d"));
 
 var selector1 = new Selector<String>();
 selector1.addChild(
-    // a placeholder element value to sync candidates, it won't affect layout
+    // 一个用于同步候选项的占位元素值，它不会影响布局
     new BindableValue<String[]>().bind(DataBindingBuilder.create(
             () -> candidates.toArray(String[]::new), Consumers.nop())
-            .c2sStrategy(SyncStrategy.NONE) // only s -> c
+            .c2sStrategy(SyncStrategy.NONE) // 仅 s -> c
             .remoteSetter(candidates -> {
                 selector1.setCandidates(Arrays.stream(candidates).toList());
             })
@@ -380,20 +368,20 @@ selector1.addChild(
     )
 );
 
-// method 2, we sync List<String>
-// represent value stored on the server and client
+// 方法2，我们同步 List<String>
+// 代表存储在服务器端和客户端的值
 // var candidates = new ArrayList<>(List.of("a", "b", "c", "d"));
 
 var selector2 = new Selector<String>();
-// because the List is a readonly value for ldlib2 sync system. you have to obtain the real type of List<String>
+// 因为对于ldlib2同步系统来说，List是只读值。您必须获取 List<String> 的实际类型。
 Type type = new TypeToken<List<String>>(){}.getType();
 selector2.addChild(
-    // a placeholder element value to sync candidates, it won't affect layout
+    // 一个用于同步候选项的占位元素值，它不会影响布局
     new BindableValue<List<String>>().bind(DataBindingBuilder.create(
             () -> candidates, Consumers.nop())
             .syncType(type)
             .initialValue(candidates)
-            .c2sStrategy(SyncStrategy.NONE) // only s -> c
+            .c2sStrategy(SyncStrategy.NONE) // 仅 s -> c
             .remoteSetter(selector2::setCandidates)
             .build()
     )
@@ -401,51 +389,50 @@ selector2.addChild(
 
 root.addChildren(selector1, selector2);
 ```
-If you understand the two approaches shown in this code, you have essentially mastered data binding.
+如果您理解了这段代码中展示的两种方法，您基本上就已经掌握了数据绑定的精髓。
 
-- **Method 1** synchronizes a `String[]`, which is straightforward and works as expected.
-- **Method 2** synchronizes a `List<String>`. Since `Collection<T>` is treated as a **read-only type** in LDLib2, you must explicitly provide an `initialValue` and specify the actual type (including generics).
+-   **方法1** 同步一个 `String[]`，这种方法直截了当，按预期工作。
+-   **方法2** 同步一个 `List<String>`。由于 `Collection<T>` 在 LDLib2 中被视为**只读类型**，您必须显式提供 `initialValue` 并指定实际类型（包括泛型）。
 
-This ensures the binding system can correctly identify and track the data.
-
+这确保了绑定系统能够正确识别和跟踪数据。
 
 ---
 
 ## UI RPCEvent
-At first glance, the data binding system seems to handle most synchronization needs, but in practice, this is not always the case.
+乍一看，数据绑定系统似乎可以处理大多数同步需求，但在实践中，情况并非总是如此。
 
-For example, if you want to execute server-side logic when a user clicks a button, data bindings are clearly not suitable.
+例如，如果您想在用户点击按钮时执行服务器端逻辑，数据绑定显然不合适。
 
-Now consider a more complex scenario: binding a `FluidSlot` to a server-side `IFluidHandler`.
-This may appear possible with data bindings. If it is used only for server-to-client display, it works fine.
-However, once interaction is involved, bidirectional synchronization becomes dangerous.
+现在考虑一个更复杂的场景：将 `FluidSlot` 绑定到服务器端的 `IFluidHandler`。
+这看起来似乎可以用数据绑定实现。如果它仅用于服务器到客户端的显示，它工作得很好。
+然而，一旦涉及交互，双向同步就变得危险。
 
-If the client is allowed to modify the value, it can easily send malicious packets to manipulate the server-side `IFluidHandler`.
+如果允许客户端修改值，它可以轻松发送恶意数据包来操纵服务器端的 `IFluidHandler`。
 
-??? "The correct approach is"
-    * Use **server-to-client** data bindings for display only
-    * Send **client interactions** (such as clicking a `FluidSlot`) to the server
-    * Handle the interaction on the server
-    * If the server state changes, synchronize it back to the client via data bindings
+??? "正确的做法是"
+    *   仅对显示使用**服务器到客户端**的数据绑定
+    *   将**客户端交互**（例如点击 `FluidSlot`）发送到服务器
+    *   在服务器端处理交互
+    *   如果服务器状态发生变化，则通过数据绑定将其同步回客户端
 
-In short, we need a mechanism to send interaction data between client and server.
-This mechanism is called **`UI RPCEvent`**.
+简而言之，我们需要一种机制来在客户端和服务器之间发送交互数据。
+这种机制被称为 **`UI RPCEvent`**。
 
-Taking a button as an example, if you have read the [UI Event](./event.md#register-event-listeners) section, you already know that UI events can be sent to the server and trigger logic.
-Internally, this is implemented using `RPCEvent`.
+以按钮为例，如果您阅读过 [UI 事件](./event.md#register-event-listeners) 部分，您已经知道UI事件可以发送到服务器并触发逻辑。
+在内部，这是使用 `RPCEvent` 实现的。
 
 ```java
-// trigger ui event on the server
+// 在服务器端触发 ui 事件
 var button = new UIElement().addServerEventListener(UIEvents.MOUSE_DOWN, e -> {
-    // do something on the server
+    // 在服务器端执行某些操作
 });
 ```
 
 ```java
-// equivalent implementation using RPCEvent
+// 使用 RPCEvent 的等效实现
 
 var clickEvent = RPCEventBuilder.simple(UIEvent.class, event -> {
-    // do something on the server
+    // 在服务器端执行某些操作
 });
 
 new UIElement().addEventListener(UIEvents.MOUSE_DOWN, e -> {
@@ -453,66 +440,64 @@ new UIElement().addEventListener(UIEvents.MOUSE_DOWN, e -> {
 }).addRPCEvent(clickEvent);
 ```
 
-You can use `RPCEventBuilder` to construct an `RPCEvent` and send data to the server when needed.
+您可以使用 `RPCEventBuilder` 来构建一个 `RPCEvent`，并在需要时向服务器发送数据。
 
 !!! note
-    When sending RPC events, **the parameters passed to `sendEvent` must exactly match the parameters defined in the `RPCEventBuilder`**, including their order and types, and don't forget to `addRPCEvent` them. 
-    Otherwise, the event will not be dispatched correctly.
+    发送 RPC 事件时，**传递给 `sendEvent` 的参数必须与在 `RPCEventBuilder` 中定义的参数完全匹配**，包括顺序和类型，并且不要忘记使用 `addRPCEvent` 添加它们。
+    否则，事件将无法被正确分发。
 
-
-### RPCEvent with return
-Sometimes you may want to send a request to the server to query data, and expect the server to return a result.
-For example, to ask the server to perform an addition and return the result, you can define it like this:
+### 带返回值的 RPCEvent
+有时您可能希望向服务器发送请求以查询数据，并期望服务器返回结果。
+例如，要求服务器执行加法并返回结果，您可以这样定义：
 
 ```java
 var queryAdd = RPCEventBuilder.simple(int.class, int.class, int.class, (a, b) -> {
-    // calculate the result and return on the server
+    // 在服务器端计算结果并返回
     return a + b;
 });
 
 new UIElement().addEventListener(UIEvents.MOUSE_DOWN, e -> {
     e.currentElement.<Integer>sendEvent(queryAdd, result -> {
-        // receive the result on the client
+        // 在客户端接收结果
         assert result == 2;
     }, 1, 2);
 }).addRPCEvent(queryAdd);
 ```
 
-### Send event to the client
-In practice, **UI RPC events are designed primarily for client → server communication**, with optional responses sent back to the client.  
-This matches most real-world use cases, where the **server owns the data and logic**, and the client only sends interaction requests.
+### 向客户端发送事件
+在实践中，**UI RPC 事件主要设计用于客户端 → 服务器的通信**，并带有可选的响应发送回客户端。
+这与大多数实际用例相匹配，即**服务器拥有数据和逻辑**，而客户端仅发送交互请求。
 
-LDLib2 therefore does **not** provide a dedicated UI-level API for server → client RPC events.
+因此，LDLib2 **不**提供专用的 UI 级别 API 用于服务器 → 客户端的 RPC 事件。
 
-However, **if you really need to actively send events from the server to the client**, you can achieve this by using the generic [RPC Packet](../../sync/rpc_packet.md) system.
+然而，**如果您确实需要从服务器主动向客户端发送事件**，可以通过使用通用的 [RPC 数据包](../../sync/rpc_packet.md) 系统来实现。
 
-Below is an example showing how the server sends an RPC packet to clients, and how the client locates and operates on a specific UI element.
+下面是一个示例，展示了服务器如何向客户端发送 RPC 数据包，以及客户端如何定位和操作特定的 UI 元素。
 
 ```java
 var element = new UIElement().setId("my_element");
 
-// annotate your packet method anywhere you want
+// 在任意位置注释您的数据包方法
 @RPCPacket("rpcEventToClient")
 public static void rpcPacketTest(RPCSender sender, String message, boolean message2) {
     if (sender.isRemote()) {
         var player = Minecraft.getInstance().player;
         if (player != null && player.containerMenu instanceof IModularUIHolderMenu uiHolderMenu) {
             uiHolderMenu.getModularUI().select("#my_element").findFirst().ifPresent(element -> {
-                // do something on the client side with your element.
+                // 在客户端使用您的元素执行某些操作。
             });
         } 
     }
 }
 
-// send pacet to the remote/server 
+// 向远程/服务器发送数据包
 RPCPacketDistributor.rpcToAllPlayers("rpcEventToClient", "Hello from server!", false)
 ```
 
-This approach gives you full control over server-initiated client logic, while keeping the UI RPC system simple and focused on interaction-driven workflows.
+这种方法使您能够完全控制服务器发起的客户端逻辑，同时保持 UI RPC 系统简单并专注于交互驱动的工作流程。
 
 !!! tip
-    When using **`FluidSlot`** with container bindings, the implementation already uses  
-    **server → client (s→c) read-only data syncing** combined with **RPC events** for interactions.
+    当使用带有容器绑定的 **`FluidSlot`** 时，其实现已经使用了 **服务器 → 客户端 (s→c) 的只读数据同步** 结合 **用于交互的 RPC 事件**。
 
-    You don’t need to handle sync strategies yourself.  
-    The `FluidSlot.bind(...)` implementation is also a good reference for learning how data syncing and RPC-based interactions work together.
+    您无需自己处理同步策略。
+    `FluidSlot.bind(...)` 的实现也是一个很好的参考，可以了解数据同步和基于 RPC 的交互如何协同工作。
